@@ -1,27 +1,31 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id            String          @id @default(cuid())
   name          String?
+  username      String          @unique // Add username field
   email         String?         @unique
   emailVerified DateTime?
   image         String?
+  password      String // Add password field
   accounts      Account[]
   sessions      Session[]
   // Optional for WebAuthn support
   Authenticator Authenticator[]
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  reservations Reservation[]
 }
- 
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -35,34 +39,34 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@unique([provider, providerAccountId])
 }
- 
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@unique([identifier, token])
 }
- 
+
 // Optional for WebAuthn support
 model Authenticator {
   credentialID         String  @unique
@@ -73,8 +77,69 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([userId, credentialID])
+}
+
+model Auditorium {
+  id          Int    @id @default(autoincrement())
+  displayName String
+
+  seats      Seat[]
+  screenings Screening[]
+}
+
+model Seat {
+  id         Int @id @default(autoincrement())
+  row        Int
+  seatNumber Int
+
+  reservations Reservation[]
+
+  auditoriumId Int
+  auditorium   Auditorium @relation(fields: [auditoriumId], references: [id], onDelete: Cascade)
+}
+
+model Reservation {
+  id         Int           @id @default(autoincrement())
+  createdAt  DateTime      @default(now())
+  totalPrice Decimal
+  status     PaymentStatus @default(RESERVED)
+
+  seats Seat[]
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  screeningId Int
+  screening   Screening @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+}
+
+model Screening {
+  id        Int      @id @default(autoincrement())
+  startTime DateTime
+  endTime   DateTime
+
+  reservations Reservation[]
+
+  auditoriumId Int
+  auditorium   Auditorium @relation(fields: [auditoriumId], references: [id], onDelete: Cascade)
+
+  movieId Int
+  movie   Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+model Movie {
+  id Int @id @default(autoincrement())
+
+  screenings Screening[]
+}
+
+enum PaymentStatus {
+  RESERVED
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }

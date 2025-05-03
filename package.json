@@ -19,13 +19,14 @@
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
 		"@sveltejs/adapter-auto": "^6.0.0",
-		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/kit": "2.20.8",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"dotenv": "^16.5.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
 		"globals": "^16.0.0",
+		"neverthrow": "^8.2.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"svelte": "^5.0.0",
@@ -40,6 +41,7 @@
 		"@auth/prisma-adapter": "^2.9.0",
 		"@auth/sveltekit": "^1.9.1",
 		"@prisma/client": "6.7.0",
+		"argon2": "^0.43.0",
 		"m3-svelte": "^3.6.1",
 		"prisma": "6.7.0"
 	}
