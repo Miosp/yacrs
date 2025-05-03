@@ -6,10 +6,7 @@
 	import type { LayoutProps } from './$types';
 
 	let { children, data }: LayoutProps = $props();
-
-	$inspect(data.session);
 </script>
 
 <TopBar isLoggedIn={data.session !== undefined} username={data.session?.name} />
-
 {@render children()}

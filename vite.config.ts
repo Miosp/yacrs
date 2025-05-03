@@ -5,5 +5,6 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	build: {
 		sourcemap: true,
-	}
+	},
+	envPrefix: ['YACRS_']
 });

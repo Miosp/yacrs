@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button, TextFieldOutlined } from 'm3-svelte';
 	import { schema } from './schema';
-	import { signUp } from '$lib/services/authClient';
+	import { signUp } from '$lib/services/clientAuth';
 	import { goto } from '$app/navigation';
 
 	let email = $state('');

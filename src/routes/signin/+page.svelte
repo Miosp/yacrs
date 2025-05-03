@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button, TextFieldOutlined, ButtonLink } from 'm3-svelte';
 	import { schema } from './schema';
-	import { signIn } from '$lib/services/authClient';
+	import { signIn } from '$lib/services/clientAuth';
 	import { goto } from '$app/navigation';
 
 	let email = $state('');
@@ -31,11 +31,18 @@
 			goto('/', { invalidate: ['app:auth'] });
 		}
 	}
+
+	async function handleSSO() {
+		await signIn.oauth2({
+			providerId: 'zitadel',
+			callbackURL: '/'
+		});
+	}
 </script>
 
 <section>
 	<main>
-		<form onsubmit={() => handleSubmit()}>
+		<form onsubmit={handleSubmit}>
 			<h1>Login to Your Account</h1>
 			{#if error}
 				<div class="error">{error}</div>
@@ -52,6 +59,7 @@
 		<h2>Or</h2>
 		<div class="buttonGroup">
 			<ButtonLink type="filled" href="/register">Register</ButtonLink>
+			<Button type="filled" on:click={handleSSO}>SSO</Button>
 		</div>
 	</main>
 </section>

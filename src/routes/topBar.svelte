@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
-	import { signOut } from '$lib/services/authClient';
+	import { signOut } from '$lib/services/clientAuth';
 	import { Button, ButtonLink } from 'm3-svelte';
 
 	let { isLoggedIn, username }: { isLoggedIn: boolean; username: string | undefined } = $props();
@@ -17,7 +17,7 @@
 	</div>
 	<div class="left">
 		{#if isLoggedIn}
-			<span class="user">{username}</span>
+			<span class="user">{username || 'He, who shall not be named'}</span>
 			<Button type="outlined" on:click={handleSignOut}>Logout</Button>
 		{:else}
 			<ButtonLink type="filled" href="/signin">Sign In</ButtonLink>
