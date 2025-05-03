@@ -1,51 +1,51 @@
 <script lang="ts">
 	import { Button, TextFieldOutlined } from 'm3-svelte';
-	import type { PageProps } from './$types';
-	import { superForm } from 'sveltekit-superforms';
+	import { schema } from './schema';
+	import { signUp } from '$lib/services/authClient';
+	import { goto } from '$app/navigation';
 
-	let { data }: PageProps = $props();
+	let email = $state('');
+	let password = $state('');
+	let displayName = $state('');
+	let error = $state('');
 
-	const { form, errors, constraints, message, enhance } = superForm(data.form);
+	async function handleSubmit() {
+		const validated = schema.safeParse({
+			email: email,
+			password: password,
+			displayName: displayName
+		});
 
-	$inspect($form);
+		if (!validated.success) {
+			error = validated.error.errors[0].message;
+			return;
+		}
+		error = '';
+
+		const { data: _, error: signUpError } = await signUp.email({
+			email: validated.data.email,
+			password: validated.data.password,
+			name: validated.data.displayName
+		});
+		if (signUpError) {
+			error = signUpError.message || 'Unknown error happened';
+		} else {
+			goto('/', { invalidate: ['app:auth'] });
+		}
+	}
 </script>
 
 <section>
-	<main>
+	<form onsubmit={() => handleSubmit()}>
 		<h1>Register a new account</h1>
-		{#if $message}
-			<h3>{$message}</h3>
+		{#if error}
+			<div class="error">{error}</div>
 		{/if}
-		<form method="POST" use:enhance>
-			<div class="inputGroup">
-				<label for="username">Username</label>
-				<TextFieldOutlined
-					name="username"
-					error={$errors.username !== undefined}
-					extraOptions={{ name: 'username', ...$constraints.username }}
-					bind:value={$form.username}
-				/>
-				{#if $errors.username}
-					<span class="error">{$errors.username}</span>
-				{/if}
-			</div>
-
-			<div class="inputGroup">
-				<label for="password">Password</label>
-				<TextFieldOutlined
-					name="password"
-					error={$errors.password !== undefined}
-					extraOptions={{ name: 'password', ...$constraints.password }}
-					bind:value={$form.password}
-				/>
-				{#if $errors.password}
-					<span class="error">{$errors.password}</span>
-				{/if}
-			</div>
-
-			<Button type="filled" extraOptions={{ type: 'submit' }}>Log in</Button>
-		</form>
-	</main>
+		<TextFieldOutlined name="E-mail" bind:value={email} />
+		<TextFieldOutlined name="Display Name" bind:value={displayName} />
+		<TextFieldOutlined name="Password" extraOptions={{ type: 'password' }} bind:value={password} />
+		<Button type="filled" extraOptions={{ type: 'submit' }}>Sign Up</Button>
+	</form>
 </section>
 
 <style>
@@ -59,7 +59,7 @@
 		align-items: center;
 	}
 
-	main {
+	form {
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
@@ -71,28 +71,6 @@
 		margin: 3rem 0;
 		background-color: rgb(var(--m3-scheme-surface-container));
 		border-radius: var(--m3-util-rounding-large);
-	}
-
-	label {
-		display: block;
-		margin: 0.5rem 0;
-		font-size: 1.2rem;
-		font-weight: 500;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		width: 100%;
-	}
-
-	.inputGroup {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-		margin: 1rem 0;
-		align-items: center;
+		gap: 1.5rem;
 	}
 </style>

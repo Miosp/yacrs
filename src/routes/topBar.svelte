@@ -1,8 +1,14 @@
 <script lang="ts">
-	import { signOut } from '@auth/sveltekit/client';
+	import { invalidate } from '$app/navigation';
+	import { signOut } from '$lib/services/authClient';
 	import { Button, ButtonLink } from 'm3-svelte';
 
 	let { isLoggedIn, username }: { isLoggedIn: boolean; username: string | undefined } = $props();
+
+	async function handleSignOut() {
+		await signOut();
+		await invalidate('app:auth');
+	}
 </script>
 
 <header>
@@ -10,12 +16,11 @@
 		<ButtonLink type="filled" href="/">Home</ButtonLink>
 	</div>
 	<div class="left">
-		<Button type="outlined" on:click={() => signOut()}>Logout</Button>
 		{#if isLoggedIn}
 			<span class="user">{username}</span>
+			<Button type="outlined" on:click={handleSignOut}>Logout</Button>
 		{:else}
-			<span class="user">Guest</span>
-			<ButtonLink type="filled" href="/signin">Login</ButtonLink>
+			<ButtonLink type="filled" href="/signin">Sign In</ButtonLink>
 		{/if}
 	</div>
 </header>

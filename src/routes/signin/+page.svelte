@@ -1,32 +1,58 @@
 <script lang="ts">
-	import { signIn } from '@auth/sveltekit/client';
 	import { Button, TextFieldOutlined, ButtonLink } from 'm3-svelte';
+	import { schema } from './schema';
+	import { signIn } from '$lib/services/authClient';
+	import { goto } from '$app/navigation';
 
-	let username = $state('');
+	let email = $state('');
 	let password = $state('');
+	let error = $state('');
+
+	async function handleSubmit() {
+		const validated = schema.safeParse({
+			email: email,
+			password: password
+		});
+
+		if (!validated.success) {
+			error = validated.error.errors[0].message;
+			return;
+		}
+		error = '';
+
+		const { data: _, error: signInError } = await signIn.email({
+			email: validated.data.email,
+			password: validated.data.password
+		});
+
+		if (signInError) {
+			error = signInError.message || 'Unknown error happened';
+		} else {
+			goto('/', { invalidate: ['app:auth'] });
+		}
+	}
 </script>
 
 <section>
 	<main>
-		<h1>Login to Your Account</h1>
-		<form onsubmit={() => signIn('credentials', { username, password })}>
-			<div class="inputGroup">
-				<label for="username">Username</label>
-				<TextFieldOutlined name="username" bind:value={username} />
-			</div>
-
-			<div class="inputGroup">
-				<label for="password">Password</label>
-				<TextFieldOutlined name="password" bind:value={password} />
-			</div>
-
+		<form onsubmit={() => handleSubmit()}>
+			<h1>Login to Your Account</h1>
+			{#if error}
+				<div class="error">{error}</div>
+			{/if}
+			<TextFieldOutlined name="E-mail" bind:value={email} />
+			<TextFieldOutlined
+				name="Password"
+				extraOptions={{ type: 'password' }}
+				bind:value={password}
+			/>
 			<Button type="filled" extraOptions={{ type: 'submit' }}>Log in</Button>
 		</form>
 		<div class="divider"></div>
-		<p>Don't have an account?</p>
-		<ButtonLink type="filled" href="/auth/register">Register</ButtonLink>
-		<div class="divider"></div>
-		<h2>Use SSO</h2>
+		<h2>Or</h2>
+		<div class="buttonGroup">
+			<ButtonLink type="filled" href="/register">Register</ButtonLink>
+		</div>
 	</main>
 </section>
 
@@ -56,27 +82,13 @@
 		border-radius: var(--m3-util-rounding-large);
 	}
 
-	label {
-		display: block;
-		margin: 0.5rem 0;
-		font-size: 1.2rem;
-		font-weight: 500;
-	}
-
 	form {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		width: 100%;
-	}
-
-	.inputGroup {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-		margin: 1rem 0;
-		align-items: center;
+		gap: 1.5rem;
 	}
 
 	.divider {
@@ -84,5 +96,13 @@
 		height: 1px;
 		background-color: rgb(var(--m3-scheme-outline));
 		margin: 1rem 0;
+	}
+
+	.buttonGroup {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 1rem 0;
+		gap: 1rem;
 	}
 </style>

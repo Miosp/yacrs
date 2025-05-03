@@ -1,9 +1,14 @@
-import type { LayoutServerLoad } from "./$types"
+import { auth } from "$lib/services/auth";
+import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = async ({ locals }) => {
-    const session = await locals.auth();
+export const load: LayoutServerLoad = async ({ request, depends }) => {
+    depends('app:auth');
+
+    const session = await auth.api.getSession({
+        headers: request.headers
+    });
 
     return {
-        user: session?.user,
-    };
-};
+        session: session?.user
+    }
+}
