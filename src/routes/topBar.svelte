@@ -19,6 +19,7 @@
 		{#if isLoggedIn}
 			<span class="user">{username || 'He, who shall not be named'}</span>
 			<Button type="outlined" on:click={handleSignOut}>Logout</Button>
+			<ButtonLink type="filled" href="resources">Resources</ButtonLink>
 		{:else}
 			<ButtonLink type="filled" href="/signin">Sign In</ButtonLink>
 		{/if}
