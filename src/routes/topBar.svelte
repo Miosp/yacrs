@@ -3,7 +3,7 @@
 	import { signOut } from '$lib/services/clientAuth';
 	import { Button, ButtonLink } from 'm3-svelte';
 
-	let { isLoggedIn, username }: { isLoggedIn: boolean; username: string | undefined } = $props();
+	const { isLoggedIn, username, isAdmin }: { isLoggedIn: boolean; username: string | undefined; isAdmin: boolean } = $props();
 
 	async function handleSignOut() {
 		await signOut();
@@ -19,7 +19,9 @@
 		{#if isLoggedIn}
 			<span class="user">{username || 'He, who shall not be named'}</span>
 			<Button type="outlined" on:click={handleSignOut}>Logout</Button>
-			<ButtonLink type="filled" href="resources">Resources</ButtonLink>
+			{#if isAdmin}
+				<ButtonLink type="filled" href="/resources">Resources</ButtonLink>
+			{/if}
 		{:else}
 			<ButtonLink type="filled" href="/signin">Sign In</ButtonLink>
 		{/if}

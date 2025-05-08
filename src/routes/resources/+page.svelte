@@ -13,6 +13,13 @@
 				<ButtonLink type="filled" href="/resources/auditoriums">View Auditoriums</ButtonLink>
 			</div>
 		</div>
+		<div class="resource-card">
+			<h2>Movies</h2>
+			<p>Explore the collection of films</p>
+			<div class="card-action">
+				<ButtonLink type="filled" href="/resources/movies">View Movies</ButtonLink>
+			</div>
+		</div>
 	</div>
 </div>
 

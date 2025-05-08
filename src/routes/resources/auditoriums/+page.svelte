@@ -4,7 +4,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { invalidate } from '$app/navigation';
 
-	let { data }: PageProps = $props();
+	const { data }: PageProps = $props();
 	const { form, errors, constraints, message, enhance } = superForm(data.form, {
 		onResult: ({ result }) => {
 			if (result.type === 'success') {

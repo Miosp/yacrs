@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { client } from "./db";
-import { customSession, genericOAuth } from "better-auth/plugins";
+import { admin, genericOAuth } from "better-auth/plugins";
 
 export const auth = betterAuth({
     emailAndPassword: {
@@ -20,15 +20,22 @@ export const auth = betterAuth({
                     clientId: import.meta.env.YACRS_ZITADEL_CLIENT_ID,
                     clientSecret: import.meta.env.YACRS_ZITADEL_CLIENT_SECRET,
                     discoveryUrl: 'http://localhost:8080/.well-known/openid-configuration',
-                    mapProfileToUser: (profile) => ({
-                        id: profile.sub,
-                        email: profile.email,
-                        name: profile.name || profile.preferred_username,
-                        image: profile.picture
-                    }),
-                    scopes: ['openid', 'email', 'profile']
+                    mapProfileToUser: (profile) => {
+                        const isAdmin = profile["urn:zitadel:iam:org:project:roles"]?.["Admin"] !== undefined
+                        return {
+                            id: profile.sub,
+                            email: profile.email,
+                            name: profile.name || profile.preferred_username,
+                            image: profile.picture,
+                            role: isAdmin ? "admin" : "user",
+                            banned: false,
+                        }
+                    },
+                    overrideUserInfo: true,
+                    scopes: ['openid', 'email', 'profile', 'urn:zitadel:iam:org:project:role:Admin']
                 }
             ]
-        })
+        }),
+        admin()
     ]
 })
