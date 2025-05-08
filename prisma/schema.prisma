@@ -122,6 +122,7 @@ model Screening {
 
 model Movie {
   id Int @id @default(autoincrement())
+  
 
   screenings Screening[]
 }
