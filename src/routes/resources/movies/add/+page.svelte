@@ -62,7 +62,7 @@
 			name="Search for a movie"
 			bind:value={searchQuery}
 			extraOptions={{
-				placeholder: 'Enter movie title to search'
+				label: 'Enter movie title to search'
 			}}
 		/>
 		<Button type="filled" on:click={searchMovies} disabled={isSearching}>

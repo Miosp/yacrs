@@ -2,51 +2,55 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	interface TextInputProps extends HTMLInputAttributes {
-		placeholder: string;
-		labelColor?: string;
+		label: string;
 		errored?: boolean;
 		value?: string;
 		loading?: boolean;
+		type?: string;
 	}
 
 	let {
-		placeholder,
-		labelColor = 'var(--surface-1)',
+		label,
 		errored = false,
 		type = 'text',
 		value = $bindable(''),
 		loading = false,
+		autocomplete = 'off',
 		...props
 	}: TextInputProps = $props();
-
-	const autocomplete = props.autocomplete ?? 'off';
 
 	const id = Math.random().toString(36).substring(7);
 </script>
 
-<div class:errored class:loading class="text-input-container container">
-	<input
-		{id}
-		placeholder=" "
-		class="text-input-input"
-		{type}
-		{autocomplete}
-		{...props}
-		bind:value
-	/>
-	<label for={id} class="text-input-label" style="--background: {labelColor}">{placeholder}</label>
+<div class:errored class:loading class="text-input-container">
+	<input {id} {type} placeholder=" " class="text-input-input" {...props} bind:value />
+	<label for={id} class="text-input-label">{label}</label>
 </div>
 
 <style>
+	.text-input-container {
+		position: relative;
+		border-radius: 5px;
+		gap: var(--gap);
+		height: 3.5rem;
+		min-width: 15rem;
+		margin: 0.5rem;
+		outline-offset: -0.0625rem;
+	}
+
+	.text-input-container:not(.loading) {
+		outline-color: rgb(var(--m3-scheme-primary));
+	}
+
 	input {
-        box-sizing: border-box;
+		box-sizing: border-box;
 		width: 100%;
 		height: 100%;
 		position: absolute;
 		inset: 0;
 		padding: 0 0.75rem;
 		min-width: 15ch;
-		color: rgb(var(--m3-scheme-on-surface));
+		color: var(--textColor, rgb(var(--m3-scheme-on-surface)));
 		display: inline-block;
 		border: none;
 		vertical-align: middle;
@@ -64,7 +68,7 @@
 			font-size: var(--m3-font-body-small-size, 0.75rem);
 			line-height: var(--m3-font-body-small-height, 1rem);
 			letter-spacing: var(--m3-font-body-small-tracking, 0.4);
-			background-color: rgb(var(--m3-scheme-on-surface));
+			background-color: rgb(var(--m3-scheme-background));
 		}
 	}
 
@@ -73,8 +77,9 @@
 		position: absolute;
 		left: 0.75rem;
 		top: 1rem;
-		color: rgb(var(--m3-scheme-on-surface));
+		color: var(--textColor, rgb(var(--m3-scheme-on-surface)));
 		background-color: transparent;
+		outline: none;
 		padding: 0 0.25rem;
 		transition:
 			all 0.2s,
@@ -83,11 +88,11 @@
 			letter-spacing 0.3s;
 	}
 
-	.container :global(svg) {
+	/* .container :global(svg) {
 		width: 1.5rem;
 		height: 1.5rem;
 		color: rgb(var(--m3-scheme-on-surface));
-	}
+	} */
 
 	.errored {
 		border-color: rgb(var(--error));
@@ -98,26 +103,16 @@
 		initial-value: 0%;
 		inherits: false;
 	}
-
-	.container {
-		position: relative;
-		border-radius: 5px;
-		gap: var(--gap);
-		height: 3.5rem;
-		min-width: 15rem;
-		margin: 0.5rem;
-		outline-offset: -0.0625rem;
-	}
-	.container:not(.loading) {
+	/* .container:not(.loading) {
 		outline: 0.0625rem solid;
-	}
+	} */
 
-	.container:has(input:focus),
-	.container:has(input:not(:placeholder-shown)) {
+	.text-input-container:has(input:focus),
+	.text-input-container:has(input:not(:placeholder-shown)) {
 		outline-color: rgb(var(--m3-scheme-primary));
 	}
 
-	.container.loading {
+	.text-input-container.loading {
 		background:
 			linear-gradient(
 					90deg,
