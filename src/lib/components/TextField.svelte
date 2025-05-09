@@ -23,25 +23,19 @@
 </script>
 
 <div class:errored class:loading class="text-input-container">
-	<input {id} {type} placeholder=" " class="text-input-input" {...props} bind:value />
+	<input
+		{id}
+		{type}
+		placeholder=" "
+		class="text-input-input"
+		aria-invalid={errored}
+		{...props}
+		bind:value
+	/>
 	<label for={id} class="text-input-label">{label}</label>
 </div>
 
 <style>
-	.text-input-container {
-		position: relative;
-		border-radius: 5px;
-		gap: var(--gap);
-		height: 3.5rem;
-		min-width: 15rem;
-		margin: 0.5rem;
-		outline-offset: -0.0625rem;
-	}
-
-	.text-input-container:not(.loading) {
-		outline-color: rgb(var(--m3-scheme-primary));
-	}
-
 	input {
 		box-sizing: border-box;
 		width: 100%;
@@ -59,7 +53,7 @@
 
 		&:hover ~ label,
 		&:focus ~ label {
-			color: rgb(var(--error, var(--m3-scheme-primary)));
+			color: rgb(var(--accentColor, var(--m3-scheme-primary)));
 		}
 
 		&:focus ~ label,
@@ -88,28 +82,34 @@
 			letter-spacing 0.3s;
 	}
 
-	/* .container :global(svg) {
-		width: 1.5rem;
-		height: 1.5rem;
-		color: rgb(var(--m3-scheme-on-surface));
-	} */
+	.text-input-container {
+		position: relative;
+		border-radius: 5px;
+		gap: var(--gap);
+		height: 3.5rem;
+		min-width: 15rem;
+		margin: 0.5rem;
+		outline-offset: -0.0625rem;
+
+		&:not(.loading) {
+			outline-width: 0.0625rem;
+			outline-style: solid;
+		}
+
+		&:has(input:focus),
+		&:has(input:not(:placeholder-shown)) {
+			outline-color: rgb(var(--accentColor, var(--m3-scheme-primary)));
+		}
+	}
 
 	.errored {
-		border-color: rgb(var(--error));
+		outline-color: var(--errorColor, rgb(var(--m3-scheme-error)));
 	}
 
 	@property --gap {
 		syntax: '<percentage>';
 		initial-value: 0%;
 		inherits: false;
-	}
-	/* .container:not(.loading) {
-		outline: 0.0625rem solid;
-	} */
-
-	.text-input-container:has(input:focus),
-	.text-input-container:has(input:not(:placeholder-shown)) {
-		outline-color: rgb(var(--m3-scheme-primary));
 	}
 
 	.text-input-container.loading {
