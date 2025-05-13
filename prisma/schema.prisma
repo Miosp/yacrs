@@ -109,7 +109,6 @@ model Reservation {
 model Screening {
   id        Int      @id @default(autoincrement())
   startTime DateTime
-  endTime   DateTime
 
   reservations Reservation[]
 

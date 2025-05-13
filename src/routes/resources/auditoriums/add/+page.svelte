@@ -19,6 +19,7 @@
 
 	<SuperFormTextField
 		label="Auditorium Name"
+		name="name"
 		errors={$errors.name}
 		constraints={$constraints.name}
 		bind:value={$form.name}
@@ -26,6 +27,7 @@
 
 	<SuperFormTextField
 		label="Rows"
+		name="rows"
 		errors={$errors.rows}
 		constraints={$constraints.rows}
 		bind:value={$rowProxy}
@@ -33,6 +35,7 @@
 
 	<SuperFormTextField
 		label="Columns"
+		name="columns"
 		errors={$errors.columns}
 		constraints={$constraints.columns}
 		bind:value={$columnProxy}

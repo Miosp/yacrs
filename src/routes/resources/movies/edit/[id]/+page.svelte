@@ -8,21 +8,16 @@
 	import SuperFormTextarea from '$lib/components/textInput/SuperFormTextarea.svelte';
 
 	let { data }: PageProps = $props();
-	const {
-		form: movieForm,
-		errors: movieFormErrors,
-		constraints: movieFormConstraints,
-		enhance: movieFormEnhance
-	} = superForm(data.movieForm);
+	const { form, errors, constraints, enhance } = superForm(data.form);
 
-	const descriptionProxy = stringProxy(movieForm, 'description', { empty: 'undefined' });
-	const runtimeProxy = intProxy(movieForm, 'runtime');
-	const tmdb_idProxy = intProxy(movieForm, 'tmdb_id');
-	const releaseYearProxy = intProxy(movieForm, 'release_year');
-	const movieFormPosterPath = stringProxy(movieForm, 'poster_path', {
+	const descriptionProxy = stringProxy(form, 'description', { empty: 'undefined' });
+	const runtimeProxy = intProxy(form, 'runtime');
+	const tmdb_idProxy = intProxy(form, 'tmdb_id');
+	const releaseYearProxy = intProxy(form, 'release_year');
+	const formPosterPath = stringProxy(form, 'poster_path', {
 		empty: 'undefined'
 	});
-	const movieFormBackdropPath = stringProxy(movieForm, 'backdrop_path', {
+	const formBackdropPath = stringProxy(form, 'backdrop_path', {
 		empty: 'undefined'
 	});
 
@@ -41,26 +36,29 @@
 		} catch (error) {
 			console.error('Error searching movies:', error);
 			searchResults = [];
-		} finally {
 		}
 	}
 
 	function fillFormWithMovie(movie: MovieResult) {
-		$movieForm.title = movie.title || '';
-		$movieForm.description = movie.overview || '';
+		$form.title = movie.title || '';
+		$form.description = movie.overview || '';
 		$releaseYearProxy = movie.release_date
 			? new Date(movie.release_date).getFullYear().toString()
 			: '';
-		$movieForm.poster_path = `https://image.tmdb.org/t/p/w300${movie.poster_path || ''}`;
-		$movieForm.backdrop_path = `https://image.tmdb.org/t/p/w300${movie.backdrop_path || ''}`;
+		$form.poster_path = `https://image.tmdb.org/t/p/w300${movie.poster_path || ''}`;
+		$form.backdrop_path = `https://image.tmdb.org/t/p/w300${movie.backdrop_path || ''}`;
 		$tmdb_idProxy = movie.id?.toString() || '';
 
 		searchResults = [];
 	}
 </script>
 
+<svelte:head>
+	<title>Edit Movie</title>
+</svelte:head>
+
 <main>
-	<h1>Add a New Movie</h1>
+	<h1>Edit Movie</h1>
 
 	<div class="search-section">
 		<h2>Search for a movie</h2>
@@ -111,21 +109,23 @@
 		{/if}
 	</div>
 
-	<form method="POST" class="movie-creation" use:movieFormEnhance>
+	<form method="POST" class="movie-creation" use:enhance>
+		<input type="hidden" name="id" value={$form.id} />
+
 		<SuperFormTextField
 			label="Title"
 			name="title"
-			errors={$movieFormErrors.title}
-			constraints={$movieFormConstraints.title}
-			bind:value={$movieForm.title}
+			errors={$errors.title}
+			constraints={$constraints.title}
+			bind:value={$form.title}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
 
 		<SuperFormTextarea
 			label="Description"
 			name="description"
-			errors={$movieFormErrors.description}
-			constraints={$movieFormConstraints.description}
+			errors={$errors.description}
+			constraints={$constraints.description}
 			bind:value={$descriptionProxy}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
@@ -133,8 +133,8 @@
 		<SuperFormTextField
 			label="Release Year"
 			name="release_year"
-			errors={$movieFormErrors.release_year}
-			constraints={$movieFormConstraints.release_year}
+			errors={$errors.release_year}
+			constraints={$constraints.release_year}
 			bind:value={$releaseYearProxy}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
@@ -142,8 +142,8 @@
 		<SuperFormTextField
 			label="Runtime (minutes)"
 			name="runtime"
-			errors={$movieFormErrors.runtime}
-			constraints={$movieFormConstraints.runtime}
+			errors={$errors.runtime}
+			constraints={$constraints.runtime}
 			bind:value={$runtimeProxy}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
@@ -151,32 +151,32 @@
 		<SuperFormTextField
 			label="Poster Path"
 			name="poster_path"
-			errors={$movieFormErrors.poster_path}
-			constraints={$movieFormConstraints.poster_path}
-			bind:value={$movieFormPosterPath}
+			errors={$errors.poster_path}
+			constraints={$constraints.poster_path}
+			bind:value={$formPosterPath}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
 
 		<SuperFormTextField
 			label="Backdrop Path"
 			name="backdrop_path"
-			errors={$movieFormErrors.backdrop_path}
-			constraints={$movieFormConstraints.backdrop_path}
-			bind:value={$movieFormBackdropPath}
+			errors={$errors.backdrop_path}
+			constraints={$constraints.backdrop_path}
+			bind:value={$formBackdropPath}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
 
 		<SuperFormTextField
 			label="TMDB ID"
 			name="tmdb_id"
-			errors={$movieFormErrors.tmdb_id}
-			constraints={$movieFormConstraints.tmdb_id}
+			errors={$errors.tmdb_id}
+			constraints={$constraints.tmdb_id}
 			bind:value={$tmdb_idProxy}
 			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
 		/>
 
 		<div class="form-actions">
-			<Button type="filled" extraOptions={{ type: 'submit' }}>Add Movie</Button>
+			<Button type="filled" extraOptions={{ type: 'submit' }}>Update Movie</Button>
 		</div>
 	</form>
 </main>

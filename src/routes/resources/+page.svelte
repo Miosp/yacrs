@@ -20,6 +20,13 @@
 				<ButtonLink type="filled" href="/resources/movies">View Movies</ButtonLink>
 			</div>
 		</div>
+		<div class="resource-card">
+			<h2>Screenings</h2>
+			<p>Create and manage movie screenings</p>
+			<div class="card-action">
+				<ButtonLink type="filled" href="/resources/screenings">View Screenings</ButtonLink>
+			</div>
+		</div>
 	</div>
 </div>
 

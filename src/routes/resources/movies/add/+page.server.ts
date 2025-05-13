@@ -1,13 +1,15 @@
-import { fail, message, superValidate } from "sveltekit-superforms";
+import { fail, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { TMDB } from "$lib/services/tmdb";
 import type { Actions } from "./$types";
 import { movieSchema } from "./schema";
 import { client } from "$lib/services/db";
+import { redirect } from "@sveltejs/kit";
 
 export const actions: Actions = {
     default: async ({ request }) => {
         const form = await superValidate(request, zod(movieSchema))
+
+        console.log('form', form)
 
         if (!form.valid) {
             return fail(400, { form })
@@ -25,6 +27,6 @@ export const actions: Actions = {
             }
         })
 
-        return message(200, "Movie added successfully")
+        return redirect(303, '/resources/movies')
     }
 };

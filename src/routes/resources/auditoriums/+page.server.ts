@@ -6,7 +6,7 @@ import { zod } from "sveltekit-superforms/adapters";
 
 export const load: PageServerLoad = async ({ parent, depends }) => {
     depends("app:auditoriums")
-    const parentData = await parent
+    await parent
     const auditorums = client.auditorium.findMany()
 
     return {
