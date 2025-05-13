@@ -2,6 +2,8 @@
 	import { intProxy, superForm } from 'sveltekit-superforms';
 	import type { PageProps } from './$types';
 	import { Button, TextFieldOutlined, TextFieldOutlinedMultiline } from 'm3-svelte';
+	import TextField from '$lib/components/TextField.svelte';
+	import type { MovieResult, MovieResultsResponse } from 'moviedb-promise';
 
 	let { data }: PageProps = $props();
 	const {
@@ -14,201 +16,207 @@
 	const tmdb_idProxy = intProxy(movieForm, 'tmdb_id');
 	const releaseYearProxy = intProxy(movieForm, 'release_year');
 
-	// Search functionality
-	let searchQuery = '';
-	let searchResults: any[] = [];
-	let isSearching = false;
+	let searchQuery: string = $state('');
+	let searchResults: MovieResult[] = $state([]);
 
 	async function searchMovies() {
 		if (!searchQuery.trim()) return;
 
-		isSearching = true;
 		try {
 			const response = await fetch(
 				`/resources/movies/api/search/${encodeURIComponent(searchQuery)}`
 			);
 			if (!response.ok) throw new Error('Search failed');
-			searchResults = await response.json();
+			searchResults = ((await response.json()) as MovieResultsResponse).results ?? [];
 		} catch (error) {
 			console.error('Error searching movies:', error);
 			searchResults = [];
 		} finally {
-			isSearching = false;
 		}
 	}
 
-	function fillFormWithMovie(movie: any) {
-		// Populate form with movie data
+	function fillFormWithMovie(movie: MovieResult) {
 		$movieForm.title = movie.title || '';
 		$movieForm.description = movie.overview || '';
-		$releaseYearProxy = movie.release_date ? parseInt(movie.release_date.substring(0, 4)) : null;
-		$runtimeProxy = movie.runtime || null;
-		$movieForm.poster_path = movie.poster_path || '';
-		$movieForm.backdrop_path = movie.backdrop_path || '';
-		$tmdb_idProxy = movie.id || null;
+		$releaseYearProxy = movie.release_date
+			? new Date(movie.release_date).getFullYear().toString()
+			: '';
+		$movieForm.poster_path = `https://image.tmdb.org/t/p/w92${movie.poster_path || ''}`;
+		$movieForm.backdrop_path = `https://image.tmdb.org/t/p/w92${movie.backdrop_path || ''}`;
+		$tmdb_idProxy = movie.id?.toString() || '';
 
-		// Clear search results after selection
 		searchResults = [];
 	}
+
+
 </script>
 
-<h1>Add a New Movie</h1>
+<main>
+	<h1>Add a New Movie</h1>
 
-<!-- Search section -->
-<div class="search-section">
-	<h2>Search for a movie</h2>
-	<div class="search-container">
-		<TextFieldOutlined
-			name="Search for a movie"
-			bind:value={searchQuery}
-			extraOptions={{
-				label: 'Enter movie title to search'
-			}}
-		/>
-		<Button type="filled" on:click={searchMovies} disabled={isSearching}>
-			{isSearching ? 'Searching...' : 'Search'}
-		</Button>
-	</div>
-
-	{#if searchResults.length > 0}
-		<div class="search-results">
-			<h3>Search Results</h3>
-			<ul>
-				{#each searchResults as movie}
-					<li>
-						<div class="movie-result">
-							{#if movie.poster_path}
-								<img
-									src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
-									alt={movie.title}
-									class="movie-poster"
-								/>
-							{:else}
-								<div class="no-poster">No Poster</div>
-							{/if}
-							<div class="movie-info">
-								<h4>
-									{movie.title}
-									{movie.release_date ? `(${movie.release_date.substring(0, 4)})` : ''}
-								</h4>
-								<p class="overview">
-									{movie.overview
-										? movie.overview.substring(0, 100) + (movie.overview.length > 100 ? '...' : '')
-										: 'No overview available'}
-								</p>
-							</div>
-							<Button type="tonal" on:click={() => fillFormWithMovie(movie)}>Select</Button>
-						</div>
-					</li>
-				{/each}
-			</ul>
+	<div class="search-section">
+		<h2>Search for a movie</h2>
+		<div class="search-container">
+			<form onsubmit={() => searchMovies()}>
+				<TextField
+					label="Search TMDB"
+					bind:value={searchQuery}
+					--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+				/>
+			</form>
 		</div>
-	{:else if isSearching}
-		<p>Searching...</p>
-	{/if}
-</div>
 
-<form method="POST" use:movieFormEnhance>
-	<div class="form-group">
-		<TextFieldOutlined
-			name="Title"
-			required
-			extraOptions={{
-				'aria-invalid': $movieFormErrors.title ? 'true' : undefined,
-				...$movieFormConstraints.title
-			}}
-			bind:value={$movieForm.title}
-		/>
-		{#if $movieFormErrors.title}<span class="invalid">{$movieFormErrors.title}</span>{/if}
+		{#if searchResults.length > 0}
+			<h3>Search Results</h3>
+			<div class="search-results">
+				<ul>
+					{#each searchResults as movie}
+						<li>
+							<div class="movie-result">
+								{#if movie.poster_path}
+									<img
+										src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
+										alt={movie.title}
+										class="movie-poster"
+									/>
+								{:else}
+									<div class="no-poster">No Poster</div>
+								{/if}
+								<div class="movie-info">
+									<h4>
+										{movie.title}
+										{movie.release_date ? `(${movie.release_date.substring(0, 4)})` : ''}
+									</h4>
+									<p class="overview">
+										{movie.overview
+											? movie.overview.substring(0, 100) +
+												(movie.overview.length > 100 ? '...' : '')
+											: 'No overview available'}
+									</p>
+								</div>
+								<Button type="tonal" on:click={() => fillFormWithMovie(movie)}>Select</Button>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 	</div>
 
-	<div class="form-group">
-		<TextFieldOutlinedMultiline
-			name="Description"
-			extraOptions={{
-				'aria-invalid': $movieFormErrors.description ? 'true' : undefined,
-				...$movieFormConstraints.description,
-				rows: 4,
-				cols: 50
-			}}
-			bind:value={$movieForm.description}
-		/>
-		{#if $movieFormErrors.description}<span class="invalid">{$movieFormErrors.description}</span
-			>{/if}
-	</div>
+	<form method="POST" use:movieFormEnhance>
+		<div class="form-group">
+			<TextFieldOutlined
+				name="Title"
+				required
+				extraOptions={{
+					'aria-invalid': $movieFormErrors.title ? 'true' : undefined,
+					...$movieFormConstraints.title
+				}}
+				bind:value={$movieForm.title}
+			/>
+			{#if $movieFormErrors.title}<span class="invalid">{$movieFormErrors.title}</span>{/if}
+		</div>
 
-	<div class="form-group">
-		<TextFieldOutlined
-			name="Release Year"
-			extraOptions={{
-				type: 'number',
-				'aria-invalid': $movieFormErrors.release_year ? 'true' : undefined,
-				...$movieFormConstraints.release_year
-			}}
-			bind:value={$releaseYearProxy}
-		/>
-		{#if $movieFormErrors.release_year}<span class="invalid">{$movieFormErrors.release_year}</span
-			>{/if}
-	</div>
+		<div class="form-group">
+			<TextFieldOutlinedMultiline
+				name="Description"
+				extraOptions={{
+					'aria-invalid': $movieFormErrors.description ? 'true' : undefined,
+					...$movieFormConstraints.description,
+					rows: 10
+				}}
+				bind:value={$movieForm.description}
+			/>
+			{#if $movieFormErrors.description}<span class="invalid">{$movieFormErrors.description}</span
+				>{/if}
+		</div>
 
-	<div class="form-group">
-		<TextFieldOutlined
-			name="Runtime (minutes)"
-			extraOptions={{
-				type: 'number',
-				'aria-invalid': $movieFormErrors.runtime ? 'true' : undefined,
-				...$movieFormConstraints.runtime
-			}}
-			bind:value={$runtimeProxy}
-		/>
-		{#if $movieFormErrors.runtime}<span class="invalid">{$movieFormErrors.runtime}</span>{/if}
-	</div>
+		<div class="form-group">
+			<TextFieldOutlined
+				name="Release Year"
+				extraOptions={{
+					type: 'number',
+					'aria-invalid': $movieFormErrors.release_year ? 'true' : undefined,
+					...$movieFormConstraints.release_year
+				}}
+				bind:value={$releaseYearProxy}
+			/>
+			{#if $movieFormErrors.release_year}<span class="invalid">{$movieFormErrors.release_year}</span
+				>{/if}
+		</div>
 
-	<div class="form-group">
-		<TextFieldOutlined
-			name="Poster Path"
-			extraOptions={{
-				'aria-invalid': $movieFormErrors.poster_path ? 'true' : undefined,
-				...$movieFormConstraints.poster_path
-			}}
-			bind:value={$movieForm.poster_path}
-		/>
-		{#if $movieFormErrors.poster_path}<span class="invalid">{$movieFormErrors.poster_path}</span
-			>{/if}
-	</div>
+		<div class="form-group">
+			<TextFieldOutlined
+				name="Runtime (minutes)"
+				extraOptions={{
+					type: 'number',
+					'aria-invalid': $movieFormErrors.runtime ? 'true' : undefined,
+					...$movieFormConstraints.runtime
+				}}
+				bind:value={$runtimeProxy}
+			/>
+			{#if $movieFormErrors.runtime}<span class="invalid">{$movieFormErrors.runtime}</span>{/if}
+		</div>
 
-	<div class="form-group">
-		<TextFieldOutlined
-			name="Backdrop Path"
-			extraOptions={{
-				'aria-invalid': $movieFormErrors.backdrop_path ? 'true' : undefined,
-				...$movieFormConstraints.backdrop_path
-			}}
-			bind:value={$movieForm.backdrop_path}
-		/>
-		{#if $movieFormErrors.backdrop_path}<span class="invalid">{$movieFormErrors.backdrop_path}</span
-			>{/if}
-	</div>
+		<div class="form-group">
+			<TextFieldOutlined
+				name="Poster Path"
+				extraOptions={{
+					'aria-invalid': $movieFormErrors.poster_path ? 'true' : undefined,
+					...$movieFormConstraints.poster_path
+				}}
+				bind:value={$movieForm.poster_path}
+			/>
+			{#if $movieFormErrors.poster_path}<span class="invalid">{$movieFormErrors.poster_path}</span
+				>{/if}
+		</div>
 
-	<div class="form-group">
-		<TextFieldOutlined
-			name="TMDB ID"
-			extraOptions={{
-				type: 'number',
-				'aria-invalid': $movieFormErrors.tmdb_id ? 'true' : undefined,
-				...$movieFormConstraints.tmdb_id
-			}}
-			bind:value={$tmdb_idProxy}
-		/>
-		{#if $movieFormErrors.tmdb_id}<span class="invalid">{$movieFormErrors.tmdb_id}</span>{/if}
-	</div>
+		<div class="form-group">
+			<TextFieldOutlined
+				name="Backdrop Path"
+				extraOptions={{
+					'aria-invalid': $movieFormErrors.backdrop_path ? 'true' : undefined,
+					...$movieFormConstraints.backdrop_path
+				}}
+				bind:value={$movieForm.backdrop_path}
+			/>
+			{#if $movieFormErrors.backdrop_path}<span class="invalid"
+					>{$movieFormErrors.backdrop_path}</span
+				>{/if}
+		</div>
 
-	<div class="form-actions">
-		<Button type="filled" extraOptions={{ type: 'submit' }}>Add Movie</Button>
-	</div>
-</form>
+		<div class="form-group">
+			<TextFieldOutlined
+				name="TMDB ID"
+				extraOptions={{
+					type: 'number',
+					'aria-invalid': $movieFormErrors.tmdb_id ? 'true' : undefined,
+					...$movieFormConstraints.tmdb_id
+				}}
+				bind:value={$tmdb_idProxy}
+			/>
+			{#if $movieFormErrors.tmdb_id}<span class="invalid">{$movieFormErrors.tmdb_id}</span>{/if}
+		</div>
+
+		<div class="form-actions">
+			<Button type="filled" extraOptions={{ type: 'submit' }}>Add Movie</Button>
+		</div>
+	</form>
+</main>
 
 <style>
+	main {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		max-width: 800px;
+		margin: 1rem auto;
+		padding: 3rem;
+		background-color: rgb(var(--m3-scheme-surface-container));
+		border-radius: var(--m3-util-rounding-large);
+	}
+
 	.form-group {
 		margin-bottom: 1rem;
 	}
@@ -224,8 +232,13 @@
 		display: block;
 	}
 
-	/* Search styles */
 	.search-section {
+		box-sizing: border-box;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
 		margin-bottom: 2rem;
 		background-color: rgba(var(--m3-scheme-surface-container), 0.8);
 		padding: 1rem;
@@ -246,7 +259,9 @@
 	.search-results {
 		max-height: 400px;
 		overflow-y: auto;
-		padding: 0.5rem;
+		padding: 1rem;
+		border-radius: var(--m3-util-rounding-large);
+		background-color: rgb(var(--m3-scheme-surface-container-high));
 	}
 
 	.search-results ul {

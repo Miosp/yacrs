@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { HTMLInputAttributes, HTMLInputTypeAttribute } from 'svelte/elements';
 
 	interface TextInputProps extends HTMLInputAttributes {
 		label: string;
 		errored?: boolean;
 		value?: string;
 		loading?: boolean;
-		type?: string;
+		type?: HTMLInputTypeAttribute | undefined | null;
 	}
 
 	let {
@@ -53,7 +53,7 @@
 
 		&:hover ~ label,
 		&:focus ~ label {
-			color: rgb(var(--accentColor, var(--m3-scheme-primary)));
+			color: var(--accentColor, rgb(var(--m3-scheme-primary)));
 		}
 
 		&:focus ~ label,
@@ -62,7 +62,7 @@
 			font-size: var(--m3-font-body-small-size, 0.75rem);
 			line-height: var(--m3-font-body-small-height, 1rem);
 			letter-spacing: var(--m3-font-body-small-tracking, 0.4);
-			background-color: rgb(var(--m3-scheme-background));
+			background-color: var(--backgroundColor, rgb(var(--m3-scheme-background)));
 		}
 	}
 
@@ -98,7 +98,7 @@
 
 		&:has(input:focus),
 		&:has(input:not(:placeholder-shown)) {
-			outline-color: rgb(var(--accentColor, var(--m3-scheme-primary)));
+			outline-color: var(--accentColor, rgb(var(--m3-scheme-primary)));
 		}
 	}
 

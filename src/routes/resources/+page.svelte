@@ -43,7 +43,7 @@
 	}
 
 	.resource-card {
-		background-color: rgb(var(--m3-scheme-surface));
+		background-color: rgb(var(--m3-scheme-surface-container));
 		padding: 1.5rem;
 		border-radius: 12px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
