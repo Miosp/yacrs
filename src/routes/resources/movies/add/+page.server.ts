@@ -15,8 +15,16 @@ export const actions: Actions = {
 
         await client.movie.create({
             data: {
-
+                title: form.data.title,
+                description: form.data.description,
+                releaseYear: form.data.release_year,
+                duration: form.data.runtime,
+                posterPath: form.data.poster_path,
+                backdropPath: form.data.backdrop_path,
+                TMDBId: form.data.tmdb_id,
             }
         })
+
+        return message(200, "Movie added successfully")
     }
 };

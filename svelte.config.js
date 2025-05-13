@@ -5,7 +5,7 @@ const DEV = process.env.NODE_ENV !== 'production';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: vitePreprocess(),
+	preprocess: vitePreprocess({ script: true }),
 
 	compilerOptions: {
 		modernAst: true,

@@ -1,0 +1,129 @@
+input,
+textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    padding: 0 0.75rem;
+    min-width: 15ch;
+    color: var(--textColor, rgb(var(--m3-scheme-on-surface)));
+    display: inline-block;
+    border: none;
+    vertical-align: middle;
+    outline: none;
+    background-color: transparent;
+
+    &:hover ~ label,
+    &:focus ~ label {
+        color: var(--accentColor, rgb(var(--m3-scheme-primary)));
+    }
+
+    &:focus ~ label,
+    &:not(:placeholder-shown) ~ label {
+        transform: translateY(-1.6rem);
+        font-size: var(--m3-font-body-small-size, 0.75rem);
+        line-height: var(--m3-font-body-small-height, 1rem);
+        letter-spacing: var(--m3-font-body-small-tracking, 0.4);
+        background-color: var(--backgroundColor, rgb(var(--m3-scheme-background)));
+    }
+}
+
+label {
+    font-weight: 500;
+    position: absolute;
+    left: 0.75rem;
+    top: 1rem;
+    color: var(--textColor, rgb(var(--m3-scheme-on-surface)));
+    background-color: transparent;
+    outline: none;
+    padding: 0 0.25rem;
+    transition:
+        all 0.2s,
+        font-size 0.3s,
+        line-height 0.3s,
+        letter-spacing 0.3s;
+}
+
+.text-input-container {
+    position: relative;
+    border-radius: 5px;
+    gap: var(--gap);
+    height: 3.5rem;
+    min-width: 15rem;
+    margin: 0.5rem;
+    outline-offset: -0.0625rem;
+
+    &:not(.loading) {
+        outline-width: 0.0625rem;
+        outline-style: solid;
+    }
+
+    &:has(input:focus),
+    &:has(input:not(:placeholder-shown)) {
+        outline-color: var(--accentColor, rgb(var(--m3-scheme-primary)));
+    }
+}
+
+.errored {
+    outline-color: var(--errorColor, rgb(var(--m3-scheme-error)));
+}
+
+@property --gap {
+    syntax: '<percentage>';
+    initial-value: 0%;
+    inherits: false;
+}
+
+.text-input-container.loading {
+    background:
+        linear-gradient(90deg,
+            transparent 0% var(--gap),
+            rgb(var(--m3-scheme-primary)) var(--gap) calc(100% - var(--gap)),
+            transparent calc(100% - var(--gap)) 100%) repeat-x,
+        linear-gradient(90deg,
+            transparent 0% var(--gap),
+            rgb(var(--m3-scheme-primary)) var(--gap) calc(100% - var(--gap)),
+            transparent calc(100% - var(--gap)) 100%) repeat-x,
+        linear-gradient(0deg,
+            transparent 0% var(--gap),
+            rgb(var(--m3-scheme-primary)) var(--gap) calc(100% - var(--gap)),
+            transparent calc(100% - var(--gap)) 100%) repeat-y,
+        linear-gradient(0deg,
+            transparent 0% var(--gap),
+            rgb(var(--m3-scheme-primary)) var(--gap) calc(100% - var(--gap)),
+            transparent calc(100% - var(--gap)) 100%) repeat-y;
+    background-size:
+        10px 0.0625rem,
+        10px 0.0625rem,
+        0.0625rem 10px,
+        0.0625rem 10px;
+    background-position:
+        0 0,
+        0 100%,
+        0 0,
+        100% 0;
+    animation:
+        moveGradient 0.3s infinite linear,
+        increaseGap 0.3s forwards;
+}
+
+@keyframes moveGradient {
+    100% {
+        background-position:
+            10px 0,
+            -10px 100%,
+            0 -10px,
+            100% 10px;
+    }
+}
+
+@keyframes increaseGap {
+    from {
+        --gap: 0%;
+    }
+
+    to {
+        --gap: 20%;
+    }
+}

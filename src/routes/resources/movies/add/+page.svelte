@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { intProxy, superForm } from 'sveltekit-superforms';
+	import { intProxy, stringProxy, superForm } from 'sveltekit-superforms';
 	import type { PageProps } from './$types';
-	import { Button, TextFieldOutlined, TextFieldOutlinedMultiline } from 'm3-svelte';
-	import TextField from '$lib/components/TextField.svelte';
+	import { Button } from 'm3-svelte';
+	import TextField from '$lib/components/textInput/TextField.svelte';
 	import type { MovieResult, MovieResultsResponse } from 'moviedb-promise';
+	import SuperFormTextField from '$lib/components/textInput/SuperFormTextField.svelte';
+	import SuperFormTextarea from '$lib/components/textInput/SuperFormTextarea.svelte';
 
 	let { data }: PageProps = $props();
 	const {
@@ -12,9 +14,17 @@
 		constraints: movieFormConstraints,
 		enhance: movieFormEnhance
 	} = superForm(data.movieForm);
+
+	const descriptionProxy = stringProxy(movieForm, 'description', { empty: 'undefined' });
 	const runtimeProxy = intProxy(movieForm, 'runtime');
 	const tmdb_idProxy = intProxy(movieForm, 'tmdb_id');
 	const releaseYearProxy = intProxy(movieForm, 'release_year');
+	const movieFormPosterPath = stringProxy(movieForm, 'poster_path', {
+		empty: 'undefined'
+	});
+	const movieFormBackdropPath = stringProxy(movieForm, 'backdrop_path', {
+		empty: 'undefined'
+	});
 
 	let searchQuery: string = $state('');
 	let searchResults: MovieResult[] = $state([]);
@@ -47,8 +57,6 @@
 
 		searchResults = [];
 	}
-
-
 </script>
 
 <main>
@@ -103,100 +111,62 @@
 		{/if}
 	</div>
 
-	<form method="POST" use:movieFormEnhance>
-		<div class="form-group">
-			<TextFieldOutlined
-				name="Title"
-				required
-				extraOptions={{
-					'aria-invalid': $movieFormErrors.title ? 'true' : undefined,
-					...$movieFormConstraints.title
-				}}
-				bind:value={$movieForm.title}
-			/>
-			{#if $movieFormErrors.title}<span class="invalid">{$movieFormErrors.title}</span>{/if}
-		</div>
+	<form method="POST" class="movie-creation" use:movieFormEnhance>
+		<SuperFormTextField
+			label="Title"
+			errors={$movieFormErrors.title}
+			constraints={$movieFormConstraints.title}
+			bind:value={$movieForm.title}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
-		<div class="form-group">
-			<TextFieldOutlinedMultiline
-				name="Description"
-				extraOptions={{
-					'aria-invalid': $movieFormErrors.description ? 'true' : undefined,
-					...$movieFormConstraints.description,
-					rows: 10
-				}}
-				bind:value={$movieForm.description}
-			/>
-			{#if $movieFormErrors.description}<span class="invalid">{$movieFormErrors.description}</span
-				>{/if}
-		</div>
+		<SuperFormTextarea
+			label="Description"
+			errors={$movieFormErrors.description}
+			constraints={$movieFormConstraints.description}
+			bind:value={$descriptionProxy}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
-		<div class="form-group">
-			<TextFieldOutlined
-				name="Release Year"
-				extraOptions={{
-					type: 'number',
-					'aria-invalid': $movieFormErrors.release_year ? 'true' : undefined,
-					...$movieFormConstraints.release_year
-				}}
-				bind:value={$releaseYearProxy}
-			/>
-			{#if $movieFormErrors.release_year}<span class="invalid">{$movieFormErrors.release_year}</span
-				>{/if}
-		</div>
+		<SuperFormTextField
+			label="Release Year"
+			errors={$movieFormErrors.release_year}
+			constraints={$movieFormConstraints.release_year}
+			bind:value={$releaseYearProxy}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
-		<div class="form-group">
-			<TextFieldOutlined
-				name="Runtime (minutes)"
-				extraOptions={{
-					type: 'number',
-					'aria-invalid': $movieFormErrors.runtime ? 'true' : undefined,
-					...$movieFormConstraints.runtime
-				}}
-				bind:value={$runtimeProxy}
-			/>
-			{#if $movieFormErrors.runtime}<span class="invalid">{$movieFormErrors.runtime}</span>{/if}
-		</div>
+		<SuperFormTextField
+			label="Runtime (minutes)"
+			errors={$movieFormErrors.runtime}
+			constraints={$movieFormConstraints.runtime}
+			bind:value={$runtimeProxy}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
-		<div class="form-group">
-			<TextFieldOutlined
-				name="Poster Path"
-				extraOptions={{
-					'aria-invalid': $movieFormErrors.poster_path ? 'true' : undefined,
-					...$movieFormConstraints.poster_path
-				}}
-				bind:value={$movieForm.poster_path}
-			/>
-			{#if $movieFormErrors.poster_path}<span class="invalid">{$movieFormErrors.poster_path}</span
-				>{/if}
-		</div>
+		<SuperFormTextField
+			label="Poster Path"
+			errors={$movieFormErrors.poster_path}
+			constraints={$movieFormConstraints.poster_path}
+			bind:value={$movieFormPosterPath}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
-		<div class="form-group">
-			<TextFieldOutlined
-				name="Backdrop Path"
-				extraOptions={{
-					'aria-invalid': $movieFormErrors.backdrop_path ? 'true' : undefined,
-					...$movieFormConstraints.backdrop_path
-				}}
-				bind:value={$movieForm.backdrop_path}
-			/>
-			{#if $movieFormErrors.backdrop_path}<span class="invalid"
-					>{$movieFormErrors.backdrop_path}</span
-				>{/if}
-		</div>
+		<SuperFormTextField
+			label="Backdrop Path"
+			errors={$movieFormErrors.backdrop_path}
+			constraints={$movieFormConstraints.backdrop_path}
+			bind:value={$movieFormBackdropPath}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
-		<div class="form-group">
-			<TextFieldOutlined
-				name="TMDB ID"
-				extraOptions={{
-					type: 'number',
-					'aria-invalid': $movieFormErrors.tmdb_id ? 'true' : undefined,
-					...$movieFormConstraints.tmdb_id
-				}}
-				bind:value={$tmdb_idProxy}
-			/>
-			{#if $movieFormErrors.tmdb_id}<span class="invalid">{$movieFormErrors.tmdb_id}</span>{/if}
-		</div>
+		<SuperFormTextField
+			label="TMDB ID"
+			errors={$movieFormErrors.tmdb_id}
+			constraints={$movieFormConstraints.tmdb_id}
+			bind:value={$tmdb_idProxy}
+			--backgroundColor="rgb(var(--m3-scheme-surface-container))"
+		/>
 
 		<div class="form-actions">
 			<Button type="filled" extraOptions={{ type: 'submit' }}>Add Movie</Button>
@@ -217,19 +187,16 @@
 		border-radius: var(--m3-util-rounding-large);
 	}
 
-	.form-group {
-		margin-bottom: 1rem;
+	.movie-creation {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		gap: 1rem;
 	}
 
 	.form-actions {
 		margin-top: 2rem;
-	}
-
-	.invalid {
-		color: rgb(var(--m3-scheme-error));
-		font-size: 0.8rem;
-		margin-top: 0.25rem;
-		display: block;
 	}
 
 	.search-section {

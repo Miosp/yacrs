@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TextField from '$lib/components/TextField.svelte';
+	import TextField from '$lib/components/textInput/TextField.svelte';
 
 	let niec = $state('nice');
 </script>
