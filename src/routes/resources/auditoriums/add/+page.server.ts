@@ -1,9 +1,15 @@
 import { fail, superValidate } from "sveltekit-superforms";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import { zod } from "sveltekit-superforms/adapters";
 import { schema } from "./schema";
 import { redirect } from "@sveltejs/kit";
 import { client } from "$lib/services/db";
+import { verifyAdminRights } from "$lib/auth/verifier";
+
+export const load: PageServerLoad = async ({ parent }) => {
+    const parentData = await parent();
+    verifyAdminRights(parentData.session);
+};
 
 export const actions: Actions = {
     default: async ({ request }) => {

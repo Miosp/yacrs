@@ -3,10 +3,13 @@ import { fail, superValidate } from "sveltekit-superforms";
 import type { Actions, PageServerLoad } from "./$types";
 import { schema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
+import { verifyAdminRights } from "$lib/auth/verifier";
 
 export const load: PageServerLoad = async ({ parent, depends }) => {
     depends("app:auditoriums")
-    await parent
+    const parentData = await parent();
+    verifyAdminRights(parentData.session);
+
     const auditorums = client.auditorium.findMany()
 
     return {

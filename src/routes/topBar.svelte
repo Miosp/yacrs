@@ -3,7 +3,11 @@
 	import { signOut } from '$lib/services/clientAuth';
 	import { Button, ButtonLink } from 'm3-svelte';
 
-	const { isLoggedIn, username, isAdmin }: { isLoggedIn: boolean; username: string | undefined; isAdmin: boolean } = $props();
+	const {
+		isLoggedIn,
+		username,
+		isAdmin
+	}: { isLoggedIn: boolean; username: string | undefined; isAdmin: boolean } = $props();
 
 	async function handleSignOut() {
 		await signOut();
@@ -35,8 +39,9 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem;
-		width: 100%;
-		background-color: rgb(var(--m3-scheme-surface-container-lowest));
+		margin: 0.5rem;
+		background-color: rgb(var(--m3-scheme-surface-container-high));
+		border-radius: var(--m3-util-rounding-large);
 	}
 
 	.left,

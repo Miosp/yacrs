@@ -4,9 +4,11 @@ import type { Actions, PageServerLoad } from "./$types";
 import { editMovieSchema } from "./schema";
 import { client } from "$lib/services/db";
 import { redirect } from "@sveltejs/kit";
+import { verifyAdminRights } from "$lib/auth/verifier";
 
 export const load: PageServerLoad = async ({ parent, params }) => {
-    await parent;
+    const parentData = await parent();
+    verifyAdminRights(parentData.session);
 
     const parsedId = parseInt(params.id);
 

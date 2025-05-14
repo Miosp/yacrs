@@ -54,7 +54,12 @@ label {
     margin: 0.5rem;
     outline-offset: -0.0625rem;
 
-    &:not(.loading) {
+    &.errored {
+        outline-width: 0.13rem;
+        outline-style: solid;
+    }
+
+    &:not(.loading):not(.errored) {
         outline-width: 0.0625rem;
         outline-style: solid;
     }
@@ -66,7 +71,7 @@ label {
 }
 
 .errored {
-    outline-color: var(--errorColor, rgb(var(--m3-scheme-error)));
+    outline-color: var(--errorColor, rgb(var(--m3-scheme-error))) !important;
 }
 
 @property --gap {
