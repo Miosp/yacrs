@@ -2,7 +2,6 @@ import { zod } from "sveltekit-superforms/adapters";
 import type { PageLoad } from "./$types";
 import { superValidate } from "sveltekit-superforms";
 import { screeningAddSchema } from "./screeningAddSchema";
-import { error } from "@sveltejs/kit";
 
 export const load: PageLoad = async ({ url, parent }) => {
     await parent();

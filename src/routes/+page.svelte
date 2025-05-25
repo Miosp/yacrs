@@ -2,7 +2,7 @@
 	import TextField from '$lib/components/textInput/TextField.svelte';
 	import { Button, ButtonLink } from 'm3-svelte';
 	import type { PageProps } from './$types';
-	import { format } from 'date-fns';
+	import { addDays, format, subDays } from 'date-fns';
 	import { goto } from '$app/navigation';
 
 	let { data }: PageProps = $props();
@@ -36,12 +36,24 @@
 
 	<div class="movie-picker">
 		<search class="date-picker">
+			<Button
+				type="tonal"
+				on:click={() => (dateInput = format(subDays(new Date(dateInput), 1), 'yyyy-MM-dd'))}
+			>
+				←
+			</Button>
 			<TextField
 				label="Date"
 				type="date"
 				bind:value={dateInput}
 				--backgroundColor="rgb(var(--m3-scheme-surface-container-low))"
 			/>
+			<Button
+				type="tonal"
+				on:click={() => (dateInput = format(addDays(new Date(dateInput), 1), 'yyyy-MM-dd'))}
+			>
+				→
+			</Button>
 		</search>
 
 		<div class="movie-container">
@@ -56,7 +68,7 @@
 						<p class="movie-description">{movie.description}</p>
 						<div class="screenings">
 							{#each movie.screenings as screening}
-								<ButtonLink type="outlined" href="/">
+								<ButtonLink type="outlined" href={`/reserve/${screening.id}`}>
 									{format(screening.startTime, 'H:mm')}
 								</ButtonLink>
 							{/each}
@@ -110,6 +122,9 @@
 	}
 
 	.date-picker {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 		margin-bottom: 1.5rem;
 		width: 100%;
 		max-width: 300px;
