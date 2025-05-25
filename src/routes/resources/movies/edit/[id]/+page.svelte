@@ -2,10 +2,10 @@
 	import { intProxy, stringProxy, superForm } from 'sveltekit-superforms';
 	import type { PageProps } from './$types';
 	import { Button } from 'm3-svelte';
-	import TextField from '$lib/components/textInput/TextField.svelte';
+	import TextField from '$lib/components/base/textInput/TextField.svelte';
 	import type { MovieResult, MovieResultsResponse } from 'moviedb-promise';
-	import SuperFormTextField from '$lib/components/textInput/SuperFormTextField.svelte';
-	import SuperFormTextarea from '$lib/components/textInput/SuperFormTextarea.svelte';
+	import SuperFormTextField from '$lib/components/base/textInput/SuperFormTextField.svelte';
+	import SuperFormTextarea from '$lib/components/base/textInput/SuperFormTextarea.svelte';
 
 	let { data }: PageProps = $props();
 	const { form, errors, constraints, enhance } = superForm(data.form);

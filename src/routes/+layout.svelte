@@ -11,5 +11,5 @@
 	const isAdmin = $derived(data.session?.role === 'admin');
 </script>
 
-<TopBar isLoggedIn={data.session !== undefined} username={data.session?.name} {isAdmin} />
+<TopBar isLoggedIn={data?.session !== undefined} username={data.session?.name} {isAdmin} />
 {@render children()}

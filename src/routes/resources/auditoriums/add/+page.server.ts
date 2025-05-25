@@ -27,6 +27,7 @@ export const actions: Actions = {
         await client.auditorium.create({
             data: {
                 displayName: form.data.name,
+                seatPrice: form.data.seatPrice,
                 seats: {
                     createMany: {
                         data: seats

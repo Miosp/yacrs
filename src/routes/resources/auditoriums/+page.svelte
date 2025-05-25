@@ -28,6 +28,7 @@
 			<div class="auditorium-card">
 				<h2 class="auditorium-id">#{auditorum.id}</h2>
 				<p class="auditorium-name">{auditorum.displayName}</p>
+				<p>Price per seat: {auditorum.seatPrice} PLN</p>
 				<form method="POST" use:enhance onsubmit={() => preprocessDelete(auditorum.id)}>
 					{#if $message}<h3>{$message}</h3>{/if}
 					<input type="hidden" name="id" value={auditorum.id} {...$constraints.id} />

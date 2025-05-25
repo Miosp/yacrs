@@ -26,6 +26,7 @@
 			{#if isAdmin}
 				<ButtonLink type="filled" href="/resources">Resources</ButtonLink>
 			{/if}
+			<ButtonLink type="filled" href="/profile">Profile</ButtonLink>
 		{:else}
 			<ButtonLink type="filled" href="/signin">Sign In</ButtonLink>
 		{/if}

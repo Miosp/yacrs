@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SuperFormTextField from '$lib/components/textInput/SuperFormTextField.svelte';
+	import SuperFormTextField from '$lib/components/base/textInput/SuperFormTextField.svelte';
 	import { Button } from 'm3-svelte';
 	import { intProxy, superForm } from 'sveltekit-superforms';
 

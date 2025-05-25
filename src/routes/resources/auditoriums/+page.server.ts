@@ -10,10 +10,8 @@ export const load: PageServerLoad = async ({ parent, depends }) => {
     const parentData = await parent();
     verifyAdminRights(parentData.session);
 
-    const auditorums = client.auditorium.findMany()
-
     return {
-        auditoriums: await auditorums
+        auditoriums: await client.auditorium.findMany()
     }
 }
 

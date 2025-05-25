@@ -1,89 +1,51 @@
 <script lang="ts">
 	import { format } from 'date-fns';
+	import { ButtonLink } from 'm3-svelte';
+	import { encodeReserveList } from './reservationUtils';
 
 	const { data } = $props();
 
-	const seatsByRow = data.screening.seats.reduce(
-		(acc, seat) => {
-			if (!acc[seat.row]) {
-				acc[seat.row] = [];
-			}
-			acc[seat.row].push(seat);
-			return acc;
-		},
-		{} as Record<number, typeof data.screening.seats>
-	);
-
-	const sortedRows = Object.keys(seatsByRow)
-		.map(Number)
-		.sort((a, b) => a - b);
-
-	sortedRows.forEach((row) => {
-		seatsByRow[row].sort((a, b) => a.number - b.number);
-	});
-
-	const reservedSeatIds = new Set(data.screening.reserved.map((seat) => seat.id));
-
-	function isSeatReserved(seatId: number): boolean {
-		return reservedSeatIds.has(seatId);
-	}
-
 	let selectedSeats = $state<number[]>([]);
 
-	function toggleSeatSelection(seat: (typeof data.screening.seats)[0]) {
-		if (isSeatReserved(seat.id)) {
-			return;
-		}
-
-		const index = selectedSeats.indexOf(seat.id);
-		if (index === -1) {
-			selectedSeats = [...selectedSeats, seat.id];
+	function toggleSeat(seatNumber: number) {
+		if (selectedSeats.includes(seatNumber)) {
+			selectedSeats = selectedSeats.filter((s) => s !== seatNumber);
 		} else {
-			selectedSeats = selectedSeats.filter((id) => id !== seat.id);
+			selectedSeats = [...selectedSeats, seatNumber];
 		}
-	}
-
-	function getSeatStatus(
-		seat: (typeof data.screening.seats)[0]
-	): 'reserved' | 'selected' | 'available' {
-		if (isSeatReserved(seat.id)) {
-			return 'reserved';
-		}
-		if (selectedSeats.includes(seat.id)) {
-			return 'selected';
-		}
-		return 'available';
 	}
 </script>
 
 <main>
 	<h1>
-		Reserve a ticket for {data.screening.movie.title} at {format(
-			data.screening.startTime,
-			'yyyy-MM-dd HH:mm'
-		)}
+		Reserve a ticket for {data.movie.title} at {format(data.startTime, 'yyyy-MM-dd HH:mm')}
 	</h1>
-	<p>Room: {data.screening.audtoriumName}</p>
+	<h2>Room: {data.roomName}</h2>
 
 	<div class="cinema-container">
-		<!-- <div class="screen">
+		<div class="screen">
 			<div class="screen-label">SCREEN</div>
-		</div> -->
+		</div>
 
 		<div class="seating-area">
-			{#each sortedRows as row}
+			{#each data.seats as row, rowNumber}
 				<div class="row">
-					<div class="row-label">Row {row}</div>
+					<div class="row-label">Row {rowNumber}</div>
 					<div class="seats">
-						{#each seatsByRow[row] as seat}
-							<button
-								class="seat {getSeatStatus(seat)}"
-								onclick={() => toggleSeatSelection(seat)}
-								disabled={isSeatReserved(seat.id)}
-								title="Row {seat.row}, Seat {seat.number}"
-							>
-								{seat.number}
-							</button>
+						{#each row as seat, seatNumber}
+							<div class="seatContainer">
+								{#if seat !== undefined}
+									<button
+										class="seat"
+										class:reserved={seat.reserved}
+										class:selected={selectedSeats.includes(seat.id)}
+										class:available={!seat.reserved && !selectedSeats.includes(seat.id)}
+										onclick={() => toggleSeat(seat.id)}
+									>
+										{seatNumber}
+									</button>
+								{/if}
+							</div>
 						{/each}
 					</div>
 				</div>
@@ -107,8 +69,11 @@
 
 		{#if selectedSeats.length > 0}
 			<div class="selected-seats">
-				<p>Selected seats: {selectedSeats.length}</p>
-				<button class="reserve-button">Reserve Selected Seats</button>
+				<ButtonLink
+					type="filled"
+					href="/reserve/{data.screeningId}/finalize?seats={encodeReserveList(selectedSeats)}"
+					>Reserve {selectedSeats.length} Selected Seats</ButtonLink
+				>
 			</div>
 		{/if}
 	</div>
@@ -117,6 +82,13 @@
 <style>
 	main {
 		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	h1,
+	h2 {
+		text-align: center;
+		margin-top: 1rem;
 	}
 
 	.cinema-container {
@@ -126,10 +98,9 @@
 		margin-top: 2rem;
 		width: 100%;
 	}
-
 	.screen {
-		width: 80%;
-		height: 3rem;
+		width: calc(100% - 5rem);
+		height: 2rem;
 		background-color: #d1d1d1;
 		margin-bottom: 2rem;
 		border-radius: 5px;
@@ -138,6 +109,8 @@
 		align-items: center;
 		transform: perspective(200px) rotateX(-10deg);
 		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+		margin-left: 5rem;
+		margin-right: 0;
 	}
 
 	.screen-label {
@@ -150,7 +123,7 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		margin-bottom: 2rem;
-		width: 90%;
+		width: 100%;
 	}
 
 	.row {
@@ -169,11 +142,21 @@
 		display: flex;
 		gap: 0.5rem;
 		flex-wrap: wrap;
+		flex-grow: 1;
+		justify-content: space-evenly;
+	}
+
+	.seatContainer {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 2.5rem;
+		height: 2.5rem;
 	}
 
 	.seat {
-		width: 2.5rem;
-		height: 2.5rem;
+		width: 100%;
+		height: 100%;
 		border-radius: 4px;
 		display: flex;
 		justify-content: center;
@@ -185,18 +168,18 @@
 	}
 
 	.seat.available {
-		background-color: #64b5f6;
-		color: white;
+		background-color: #5eb7ff;
+		color: black;
 	}
 
 	.seat.available:hover {
-		background-color: #2196f3;
+		background-color: #39a6ff;
 		transform: scale(1.05);
 	}
 
 	.seat.selected {
-		background-color: #4caf50;
-		color: white;
+		background-color: #6dc970;
+		color: black;
 		transform: scale(1.05);
 	}
 
@@ -225,11 +208,11 @@
 	}
 
 	.seat-example.available {
-		background-color: #64b5f6;
+		background-color: #5eb7ff;
 	}
 
 	.seat-example.selected {
-		background-color: #4caf50;
+		background-color: #6dc970;
 	}
 
 	.seat-example.reserved {
