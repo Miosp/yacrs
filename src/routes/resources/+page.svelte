@@ -27,6 +27,13 @@
 				<ButtonLink type="filled" href="/resources/screenings">View Screenings</ButtonLink>
 			</div>
 		</div>
+		<div class="resource-card">
+			<h2>Reservations</h2>
+			<p>View and manage all user reservations</p>
+			<div class="card-action">
+				<ButtonLink type="filled" href="/resources/reservations">View Reservations</ButtonLink>
+			</div>
+		</div>
 	</div>
 </div>
 

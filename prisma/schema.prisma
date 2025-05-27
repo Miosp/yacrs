@@ -98,6 +98,7 @@ model Reservation {
   createdAt  DateTime      @default(now())
   totalPrice Decimal
   status     PaymentStatus @default(RESERVED)
+  used       Boolean       @default(false)
 
   seats Seat[]
 
