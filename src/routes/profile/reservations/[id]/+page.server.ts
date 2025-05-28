@@ -18,15 +18,25 @@ export const load: PageServerLoad = async ({ parent, params, request }) => {
             id: reservationId
         },
         include: {
-            seats: {
-                include: {
-                    auditorium: true
-                }
-            },
+            seats: true,
             screening: {
                 include: {
                     movie: true,
-                    auditorium: true
+                    auditorium: {
+                        include: {
+                            seats: true
+                        }
+                    },
+                    reservations: {
+                        where: {
+                            id: {
+                                not: reservationId
+                            }
+                        },
+                        include: {
+                            seats: true
+                        }
+                    }
                 }
             }
         }

@@ -73,7 +73,7 @@
 			{#each $purchaseForm.seats as seat}
 				<input type="hidden" name="seats" value={seat} />
 			{/each}
-			<Button type="tonal" extraOptions={{ type: 'submit' }}>Confirm Reservation</Button>
+			<Button type="tonal" extraOptions={{ type: 'submit' }}>Pay Now</Button>
 		</form>
 		<p>or</p>
 		<form action="?/reserve" method="POST" use:reserveEnhance onsubmit={injectSeats}>

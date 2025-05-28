@@ -50,7 +50,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
     return {
         id: screening.id,
-        audtoriumName: screening.auditorium.displayName,
+        auditoriumName: screening.auditorium.displayName,
         startTime: screening.startTime,
         movie: screening.movie,
         seats: seatList,

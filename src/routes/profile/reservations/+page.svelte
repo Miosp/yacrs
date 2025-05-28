@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { formatPaymentStatus } from '$lib/utils/paymentStatus.js';
 	import { format } from 'date-fns';
 	import { ButtonLink } from 'm3-svelte';
@@ -35,7 +36,10 @@
 				</thead>
 				<tbody>
 					{#each data.reservations as reservation}
-						<tr class="reservation-row">
+						<tr
+							class="reservation-row"
+							onclick={() => goto(`/profile/reservations/${reservation.id}`)}
+						>
 							<td class="movie-cell">
 								<div class="movie-info">
 									<span class="movie-title">{reservation.screening.movie.title}</span>
@@ -56,7 +60,7 @@
 							</td>
 							<td class="actions-cell">
 								<ButtonLink type="outlined" href={`/profile/reservations/${reservation.id}`}>
-									View Details
+									Details
 								</ButtonLink>
 							</td>
 						</tr>
@@ -158,11 +162,13 @@
 	}
 
 	.reservation-row {
-		transition: background-color 0.2s ease;
+		background-color: rgb(var(--m3-scheme-surface));
+		cursor: pointer;
+		transition: filter 0.2s ease-in-out;
 	}
 
 	.reservation-row:hover {
-		background-color: rgba(var(--m3-scheme-primary), 0.04);
+		filter: brightness(0.98);
 	}
 
 	td {

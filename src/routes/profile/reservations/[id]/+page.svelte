@@ -2,8 +2,13 @@
 	import { format } from 'date-fns';
 	import { PaymentStatus, type Prisma } from '@prisma/client';
 	import { Button, Card } from 'm3-svelte';
+	import Auditorium from '$lib/components/Auditorium.svelte';
 
 	const { data } = $props();
+
+	const reservedSeats = data.reservation.screening.reservations.flatMap((reservation) =>
+		reservation.seats.map((seat) => seat.id)
+	);
 
 	function formatDateTime(date: Date) {
 		return format(date, 'PPPPpp');
@@ -64,6 +69,12 @@
 
 			<div class="seats-section">
 				<h2>Selected Seats</h2>
+				<Auditorium
+					seats={data.reservation.screening.auditorium.seats}
+					reserved={reservedSeats}
+					userReserved={data.reservation.seats.map((seat) => seat.id)}
+					interactible={false}
+				/>
 				<div class="seats-grid">
 					{#each data.reservation.seats as seat}
 						<div class="seat-item">
@@ -79,19 +90,19 @@
 					<p><strong>Total Price:</strong> {formatPrice(data.reservation.totalPrice)}</p>
 					<p><strong>Reserved On:</strong> {formatDateTime(data.reservation.createdAt)}</p>
 				</div>
-                {#if data.reservation.status === PaymentStatus.RESERVED || data.reservation.status === PaymentStatus.COMPLETED}
-                    <div class="payment-actions">
-                        {#if data.reservation.status === PaymentStatus.RESERVED}
-                            <form action="?/pay" method="POST">
-                                <Button type="tonal" extraOptions={{ type: 'submit' }}>Pay Now</Button>
-                            </form>
-                        {:else if data.reservation.status === PaymentStatus.COMPLETED}
-                            <form action="?/refund" method="POST">
-                                <Button type="tonal" extraOptions={{ type: 'submit' }}>Request Refund</Button>
-                            </form>
-                        {/if}
-                    </div>
-                {/if}
+				{#if data.reservation.status === PaymentStatus.RESERVED || data.reservation.status === PaymentStatus.COMPLETED}
+					<div class="payment-actions">
+						{#if data.reservation.status === PaymentStatus.RESERVED}
+							<form action="?/pay" method="POST">
+								<Button type="tonal" extraOptions={{ type: 'submit' }}>Pay Now</Button>
+							</form>
+						{:else if data.reservation.status === PaymentStatus.COMPLETED}
+							<form action="?/refund" method="POST">
+								<Button type="tonal" extraOptions={{ type: 'submit' }}>Request Refund</Button>
+							</form>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</div>
 	</Card>
@@ -132,7 +143,7 @@
 	.status {
 		padding: 0.5rem 1rem;
 		border-radius: 20px;
-		color: white;
+		color: rgb(var(--m3-scheme-on-surface));
 		font-weight: bold;
 		text-transform: uppercase;
 		font-size: 0.875rem;
