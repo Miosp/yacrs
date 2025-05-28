@@ -6,16 +6,30 @@
 	import { dateStrOrToday } from './mainPageUtil';
 	import { Button } from 'm3-svelte';
 	import MovieCard from '$lib/components/MovieCard.svelte';
+	import MovieModal from '$lib/components/MovieModal.svelte'; // We'll create this component
 
 	let { data }: PageProps = $props();
 
 	let dateInput = $state(format(new Date(), 'yyyy-MM-dd'));
 	let dateOrToday = $derived.by(() => dateStrOrToday(dateInput));
+	let selectedMovie = $state(null);
+	let showModal = $state(false);
 
 	$effect(() => {
 		const path = dateOrToday ? `/?date=${dateOrToday}` : '/';
 		goto(path);
 	});
+
+	function openModal(movie) {
+		selectedMovie = movie;
+		showModal = true;
+		document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+	}
+
+	function closeModal() {
+		showModal = false;
+		document.body.style.overflow = 'auto';
+	}
 </script>
 
 <div class="page-container">
@@ -45,17 +59,26 @@
 
 		<div class="movie-container">
 			{#each data.movies as movie}
-				<MovieCard
-					title={movie.title}
-					posterUrl={movie.posterPath}
-					duration={movie.duration}
-					description={movie.description}
-					screenings={movie.screenings}
-				/>
+				<div on:click={() => openModal(movie)} class="movie-card-wrapper">
+					<MovieCard
+						title={movie.title}
+						posterUrl={movie.posterPath}
+						duration={movie.duration}
+						description={movie.description}
+						screenings={movie.screenings}
+					/>
+				</div>
 			{/each}
 		</div>
 	</div>
 </div>
+
+{#if showModal && selectedMovie}
+	<MovieModal 
+		movie={selectedMovie}
+		onClose={closeModal}
+	/>
+{/if}
 
 <style>
 	.page-container {
@@ -96,6 +119,15 @@
 		grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
 		width: 100%;
 		gap: 1.5rem;
+	}
+
+	.movie-card-wrapper {
+		cursor: pointer;
+		transition: transform 0.2s ease;
+	}
+
+	.movie-card-wrapper:hover {
+		transform: scale(1.02);
 	}
 
 	@media (max-width: 768px) {
