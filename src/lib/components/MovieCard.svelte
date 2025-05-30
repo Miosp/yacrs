@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { format } from 'date-fns';
 	import { Button, ButtonLink } from 'm3-svelte';
+	import MovieModal from './MovieModal.svelte';
 
 	interface MovieCardProps {
+		id: number | null;
 		title: string;
 		posterUrl: string | null;
 		duration: number | null;
@@ -15,10 +17,18 @@
 		startTime: Date;
 	}
 
-	const { title, posterUrl, duration, description, screenings }: MovieCardProps = $props();
+	const { id, title, posterUrl, duration, description, screenings }: MovieCardProps = $props();
+	let isModalOpen = $state(false);
+
+	function onClick() {
+		isModalOpen = true;
+	}
 </script>
 
-<article aria-label={`Movie: ${title}`}>
+<button type="button" aria-label={`Movie: ${title}`} onclick={onClick} class="movie-card">
+	{#if !posterUrl}
+		<img class="poster" src="/default-poster.png" alt="Default poster" />
+	{/if}
 	<div class="poster-container">
 		<img class="poster" src={posterUrl} alt={`Poster of ${title}`} />
 	</div>
@@ -40,10 +50,11 @@
 			{/each}
 		</div>
 	</div>
-</article>
+</button>
+<MovieModal bind:open={isModalOpen} {id} {title} {posterUrl} {duration} {description} />
 
 <style>
-	article {
+	button {
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: row;
@@ -55,6 +66,10 @@
 			transform 0.2s,
 			box-shadow 0.2s;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+		border: none;
+		cursor: pointer;
+		width: 100%;
+		text-align: left;
 
 		&:hover {
 			transform: translateY(-4px);
@@ -99,10 +114,15 @@
 		flex-wrap: wrap;
 		gap: 0.5rem;
 		margin-bottom: 0.5rem;
+		pointer-events: none;
+
+		:global(*) {
+			pointer-events: auto;
+		}
 	}
 
 	@media (max-width: 768px) {
-		article {
+		button {
 			flex-direction: column;
 			align-items: center;
 		}
