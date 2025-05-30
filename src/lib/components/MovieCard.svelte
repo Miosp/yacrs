@@ -24,7 +24,9 @@
 	</div>
 	<div class="movie-details">
 		<h3 class="movie-title">{title}</h3>
-		<p>{duration}min</p>
+		{#if duration !== null}
+			<p>{duration}min</p>
+		{/if}
 		<p class="movie-description">{description}</p>
 		<div class="screenings">
 			{#each screenings as screening}

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import './textInput.css';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
 	interface TextInputProps extends HTMLInputAttributes {
@@ -34,3 +33,7 @@
 	/>
 	<label for={id} class="text-input-label">{label}</label>
 </div>
+
+<style>
+	@import './textInput.css';
+</style>

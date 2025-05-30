@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { HTMLTextareaAttributes } from 'svelte/elements';
-	import './textInput.css';
 
 	interface TextareaProps extends HTMLTextareaAttributes {
 		label: string;
@@ -34,6 +33,7 @@
 </div>
 
 <style>
+	@import './textInput.css';
 	textarea {
 		resize: none;
 	}
