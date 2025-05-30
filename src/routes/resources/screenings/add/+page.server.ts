@@ -8,7 +8,14 @@ import { verifyAdminRights } from "$lib/auth/verifier";
 
 export const load: PageServerLoad = async ({ parent }) => {
     const parentData = await parent();
-    verifyAdminRights(parentData.session)
+    verifyAdminRights(parentData.session);
+
+    // Fetch all movies for the dropdown
+    const movies = await client.movie.findMany({
+        select: { id: true, title: true }
+    });
+
+    return { movies };
 };
 
 export const actions: Actions = {

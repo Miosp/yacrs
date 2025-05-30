@@ -46,6 +46,7 @@
 		<div class="movie-container">
 			{#each data.movies as movie}
 				<MovieCard
+					id={movie.TMDBId}
 					title={movie.title}
 					posterUrl={movie.posterPath}
 					duration={movie.duration}
