@@ -4,6 +4,11 @@ import { client } from "./db";
 import { admin, genericOAuth } from "better-auth/plugins";
 
 export const auth = betterAuth({
+    baseURL: import.meta.env.BETTER_AUTH_URL || (
+        import.meta.env.NODE_ENV === 'production'
+            ? "http://localhost:3000"
+            : "http://localhost:5173"
+    ),
     emailAndPassword: {
         enabled: true,
         minPasswordLength: 2,

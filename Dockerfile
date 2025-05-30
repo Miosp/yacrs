@@ -10,8 +10,10 @@ RUN npm ci --only=production && npm cache clean --force
 
 FROM base AS builder
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json* tsconfig.json svelte.config.js vite.config.ts ./
 RUN npm ci
+COPY static ./static
+COPY prisma ./prisma
 COPY src ./src
 COPY .env.example .env
 RUN npx prisma generate; \
@@ -23,13 +25,12 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 sveltekit
 
+COPY --from=deps --chown=sveltekit:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=sveltekit:nodejs /app/build ./build
 COPY --from=builder --chown=sveltekit:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=sveltekit:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=sveltekit:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=sveltekit:nodejs /app/static ./static
-
-COPY --from=deps --chown=sveltekit:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=sveltekit:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 
 RUN mkdir -p /app/prisma && chown -R sveltekit:nodejs /app/prisma
 

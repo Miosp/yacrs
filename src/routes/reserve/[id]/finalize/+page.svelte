@@ -33,6 +33,7 @@
 	<Card type="elevated">
 		<h1>Finalize Reservation</h1>
 		<MovieCard
+			id={data.screening.movie.TMDBId}
 			title={data.screening.movie.title}
 			posterUrl={data.screening.movie.posterPath}
 			duration={data.screening.movie.duration}
