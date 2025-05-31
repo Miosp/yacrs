@@ -15,14 +15,7 @@ export const actions: Actions = {
     default: async ({ request }) => {
         const form = await superValidate(request, zod(schema))
 
-        if (!form.valid) {
-            return fail(400, { form })
-        }
-
-        const seats = Array.from({ length: form.data.columns * form.data.rows }, (_, i) => ({
-            row: Math.floor(i / form.data.columns),
-            seatNumber: i % form.data.columns
-        }));
+        if (!form.valid) return fail(400, { form })
 
         await client.auditorium.create({
             data: {
@@ -30,9 +23,11 @@ export const actions: Actions = {
                 seatPrice: form.data.seatPrice,
                 seats: {
                     createMany: {
-                        data: seats
+                        data: form.data.seats
                     }
-                }
+                },
+                rows: form.data.rows,
+                seatsPerRow: form.data.seatsPerRow
             }
         })
 

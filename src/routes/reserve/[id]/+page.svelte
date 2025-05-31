@@ -5,11 +5,22 @@
 	import Auditorium from '$lib/components/Auditorium.svelte';
 	import type { PageData } from './$types';
 	import { source } from 'sveltekit-sse';
+	import { SeatState, type Seat, type EmptySeat } from '$lib/data/Seat';
 
 	const { data }: { data: PageData } = $props();
 
 	let reservedSeats = $state(data.reservedSeatIds);
 	let selectedSeats = $state<number[]>([]);
+
+	const seatData: Seat[] = $derived.by(() =>
+		data.auditoriumSeats.map((seat) => ({
+			exists: true,
+			id: seat.id,
+			row: seat.row,
+			number: seat.seatNumber,
+			state: getSeatStatus(seat)
+		}))
+	);
 
 	source(`/reserve/${data.screeningId}/api`)
 		.select('changed')
@@ -21,11 +32,32 @@
 			selectedSeats = selectedSeats.filter((s) => !changedSeats.includes(s));
 		});
 
-	function toggleSeat(seatId: number) {
-		if (selectedSeats.includes(seatId)) {
-			selectedSeats = selectedSeats.filter((s) => s !== seatId);
+	function toggleSeat(seat: Seat | EmptySeat) {
+		if (!seat.exists) {
+			return;
 		} else {
-			selectedSeats = [...selectedSeats, seatId];
+			const castSeat = seat as Seat;
+			if (castSeat.state === SeatState.AVAILABLE) {
+				if (selectedSeats.includes(castSeat.id)) {
+					selectedSeats = selectedSeats.filter((s) => s !== castSeat.id);
+				} else {
+					selectedSeats = [...selectedSeats, castSeat.id];
+				}
+			} else if (castSeat.state === SeatState.USER_RESERVED) {
+				selectedSeats = selectedSeats.filter((s) => s !== castSeat.id);
+			} else {
+				return;
+			}
+		}
+	}
+
+	function getSeatStatus(seat: { id: number }) {
+		if (reservedSeats.includes(seat.id)) {
+			return SeatState.RESERVED;
+		} else if (selectedSeats.includes(seat.id)) {
+			return SeatState.USER_RESERVED;
+		} else {
+			return SeatState.AVAILABLE;
 		}
 	}
 </script>
@@ -37,13 +69,7 @@
 	<h2>Room: {data.roomName}</h2>
 
 	<div class="cinema-container">
-		<Auditorium
-			seats={data.auditoriumSeats}
-			reserved={reservedSeats}
-			userReserved={selectedSeats}
-			onSeatClick={toggleSeat}
-			interactible={true}
-		/>
+		<Auditorium seats={seatData} onSeatClick={toggleSeat} interactible={true} roomColumns={data.roomWidth} roomRows={data.roomHeight} />
 
 		{#if selectedSeats.length > 0}
 			<div class="selected-seats">

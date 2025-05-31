@@ -59,7 +59,9 @@ export async function loadSeatData(id: number) {
         startTime: screening.startTime,
         movie: screening.movie,
         seatList,
-        reservedSeats
+        reservedSeats,
+        roomWidth: screening.auditorium.seatsPerRow,
+        roomHeight: screening.auditorium.rows
     }
 }
 
@@ -91,8 +93,8 @@ export type SeatViewerView = {
 }
 
 export async function transformSeatData(data: LoadedSeatData) {
-    const roomWidth = data.seatList.reduce((max, seat) => Math.max(max, seat.row), 0);
-    const roomHeight = data.seatList.reduce((max, seat) => Math.max(max, seat.number), 0);
+    const roomWidth = data.roomWidth;
+    const roomHeight = data.roomHeight;
 
     const seats: (SeatViewerView | undefined)[][] = Array(roomWidth + 1)
         .fill(null)

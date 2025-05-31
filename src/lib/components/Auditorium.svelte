@@ -1,31 +1,26 @@
 <script lang="ts">
-	interface Seat {
-		id: number;
-		row: number;
-		seatNumber: number;
-	}
-
+	import type { EmptySeat, Seat } from '$lib/data/Seat';
 	interface AuditoriumProps {
 		seats: Seat[];
-		reserved?: number[];
-		userReserved?: number[];
-		onSeatClick?: (seatId: number) => void;
+		onSeatClick?: (seat: Seat | EmptySeat) => void;
 		interactible?: boolean;
+		roomRows?: number;
+		roomColumns?: number;
 	}
 
 	const {
 		seats,
-		reserved = [],
-		userReserved = [],
 		onSeatClick = () => {},
-		interactible = true
+		interactible = true,
+		roomRows,
+		roomColumns
 	}: AuditoriumProps = $props();
 
-	const roomRowSize = $derived.by(() =>
-		seats.reduce((maxRowNum, seat) => Math.max(seat.row, maxRowNum), 0)
+	const roomRowSize = $derived.by(
+		() => roomRows ?? seats.reduce((maxRowNum, seat) => Math.max(seat.row, maxRowNum), 0)
 	);
-	const roomColumnSize = $derived.by(() =>
-		seats.reduce((maxSeatNum, seat) => Math.max(seat.seatNumber, maxSeatNum), 0)
+	const roomColumnSize = $derived.by(
+		() => roomColumns ?? seats.reduce((maxSeatNum, seat) => Math.max(seat.number, maxSeatNum), 0)
 	);
 
 	const seatGrid = $derived.by(() => {
@@ -34,24 +29,33 @@
 			.map(() => Array(roomColumnSize).fill(null));
 
 		for (const seat of seats) {
-			if (seat.row > 0 && seat.seatNumber > 0) {
-				grid[seat.row - 1][seat.seatNumber - 1] = seat;
+			if (seat.row > 0 && seat.number > 0) {
+				grid[seat.row - 1][seat.number - 1] = seat;
 			}
 		}
 
 		return grid;
 	});
 
-	function getSeatStatus(seat: Seat | null): 'empty' | 'available' | 'reserved' | 'user-reserved' {
+	function getSeatStatus(seat: Seat | null) {
 		if (!seat) return 'empty';
-		if (userReserved.includes(seat.id)) return 'user-reserved';
-		if (reserved.includes(seat.id)) return 'reserved';
-		return 'available';
+		else return seat.state;
 	}
 
-	function handleSeatClick(seat: Seat | null) {
-		if (seat && getSeatStatus(seat) !== 'reserved' && interactible) {
-			onSeatClick(seat.id);
+	function handleSeatClick(seat: Seat | null, rowIndex: number, seatIndex: number) {
+		if (interactible) {
+			let seatValue: Seat | EmptySeat;
+			if (!seat) {
+				seatValue = {
+					exists: false,
+					row: rowIndex + 1,
+					number: seatIndex + 1
+				};
+			} else {
+				seatValue = seat;
+			}
+
+			onSeatClick(seatValue);
 		}
 	}
 
@@ -59,6 +63,7 @@
 	let screenWidth = $state('fit-content');
 
 	$effect(() => {
+		seats;
 		if (seatGridElement) {
 			screenWidth = `${seatGridElement.offsetWidth}px`;
 		}
@@ -84,21 +89,23 @@
 				bind:this={seatGridElement}
 				style="grid-template-columns: repeat({roomColumnSize}, 1fr); grid-template-rows: repeat({roomRowSize}, 1fr);"
 			>
-				{#each seatGrid as row}
-					{#each row as seat}
+				{#each seatGrid as row, rowIndex}
+					{#each row as seat, seatIndex}
 						{@const status = getSeatStatus(seat)}
 						<button
 							class="seat seat--{status}"
-							class:seat--clickable={seat && status !== 'reserved' && interactible}
-							disabled={!seat || status === 'reserved' || !interactible}
-							onclick={() => handleSeatClick(seat)}
-							aria-label={seat
-								? `Row ${seat.row}, Seat ${seat.seatNumber} - ${status}`
-								: 'Empty space'}
+							class:seat--clickable={status !== 'reserved' && interactible}
+							disabled={status === 'reserved' || !interactible}
+							onclick={() => handleSeatClick(seat, rowIndex, seatIndex)}
+							aria-label={seat ? `Row ${seat.row}, Seat ${seat.number} - ${status}` : 'Empty space'}
 						>
 							{#if seat}
 								<div class="seat-content">
-									<span class="seat-number">{seat.seatNumber}</span>
+									<span class="seat-number">{seat.number}</span>
+								</div>
+							{:else}
+								<div class="seat-content seat--empty">
+									<span class="seat-number">-</span>
 								</div>
 							{/if}
 						</button>
@@ -220,7 +227,7 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: 600;
-		padding: 0 0.5rem;  
+		padding: 0 0.5rem;
 		font-size: 0.875rem;
 		color: rgb(var(--m3-scheme-on-surface-variant));
 		background: rgb(var(--m3-scheme-surface-variant));
@@ -257,7 +264,6 @@
 	.seat--empty {
 		background: transparent;
 		box-shadow: none;
-		visibility: hidden;
 	}
 
 	.seat--available {

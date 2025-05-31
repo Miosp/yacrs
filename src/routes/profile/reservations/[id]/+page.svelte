@@ -3,12 +3,25 @@
 	import { PaymentStatus, type Prisma } from '@prisma/client';
 	import { Button, Card } from 'm3-svelte';
 	import Auditorium from '$lib/components/Auditorium.svelte';
+	import { SeatState, type Seat } from '$lib/data/Seat';
 
 	const { data } = $props();
 
 	const reservedSeats = data.reservation.screening.reservations.flatMap((reservation) =>
 		reservation.seats.map((seat) => seat.id)
 	);
+	const selectedSeats = data.reservation.seats.map((seat) => seat.id);
+	const seats: Seat[] = data.reservation.screening.auditorium.seats.map((seat) => ({
+		exists: true,
+		id: seat.id,
+		row: seat.row,
+		number: seat.seatNumber,
+		state: selectedSeats.includes(seat.id)
+			? SeatState.USER_RESERVED
+			: reservedSeats.includes(seat.id)
+				? SeatState.RESERVED
+				: SeatState.AVAILABLE
+	}));
 
 	function formatDateTime(date: Date) {
 		return format(date, 'PPPPpp');
@@ -70,10 +83,10 @@
 			<div class="seats-section">
 				<h2>Selected Seats</h2>
 				<Auditorium
-					seats={data.reservation.screening.auditorium.seats}
-					reserved={reservedSeats}
-					userReserved={data.reservation.seats.map((seat) => seat.id)}
+					{seats}
 					interactible={false}
+					roomColumns={data.reservation.screening.auditorium.seatsPerRow}
+					roomRows={data.reservation.screening.auditorium.rows}
 				/>
 				<div class="seats-grid">
 					{#each data.reservation.seats as seat}

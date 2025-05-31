@@ -77,6 +77,8 @@ model Auditorium {
   id          Int     @id @default(autoincrement())
   displayName String
   seatPrice   Decimal @default(10.00)
+  rows        Int
+  seatsPerRow Int
 
   seats      Seat[]
   screenings Screening[]
