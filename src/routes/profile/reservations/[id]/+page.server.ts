@@ -5,6 +5,8 @@ import type { Actions, PageServerLoad } from "./$types";
 import { PaymentStatus } from "@prisma/client";
 import { reservationEmitter } from "$lib/server/messageQueueExample";
 
+const appRoot: string | undefined = import.meta.env.YACRS_BASE_URL;
+
 export const load: PageServerLoad = async ({ parent, params, request }) => {
     await parent();
     const reservationId = parseInt(params.id);
@@ -55,7 +57,8 @@ export const load: PageServerLoad = async ({ parent, params, request }) => {
     }
 
     return {
-        reservation
+        reservation,
+        appRoot
     }
 };
 

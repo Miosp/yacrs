@@ -10,7 +10,7 @@
 	const { data } = $props();
 
 	let reservations = $state(data.reservations);
-	let searchTerm = $state('');
+	let searchTerm = $state(data.search);
 	let pendingReservation = $state<{ id: number; used: boolean; title: string } | null>(null);
 	let confirmDialogOpen = $state<boolean>(false);
 

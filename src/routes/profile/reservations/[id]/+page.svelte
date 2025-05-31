@@ -4,6 +4,7 @@
 	import { Button, Card } from 'm3-svelte';
 	import Auditorium from '$lib/components/Auditorium.svelte';
 	import { SeatState, type Seat } from '$lib/data/Seat';
+	import { createQrSvgString } from '@svelte-put/qr';
 
 	const { data } = $props();
 
@@ -22,6 +23,11 @@
 				? SeatState.RESERVED
 				: SeatState.AVAILABLE
 	}));
+	const reservationUrl = `${data.appRoot}/resources/reservations?search=${data.reservation.id}`;
+	const qrCodeSvgString = createQrSvgString({
+		data: reservationUrl,
+		shape: 'circle'
+	});
 
 	function formatDateTime(date: Date) {
 		return format(date, 'PPPPpp');
@@ -45,27 +51,35 @@
 
 		<div class="reservation-details">
 			<div class="movie-section">
-				<h2>Movie Details</h2>
-				<div class="movie-info">
-					{#if data.reservation.screening.movie.posterPath}
-						<img
-							src="https://image.tmdb.org/t/p/w200{data.reservation.screening.movie.posterPath}"
-							alt="{data.reservation.screening.movie.title} poster"
-							class="movie-poster"
-						/>
-					{/if}
-					<div class="movie-details">
-						<h3>{data.reservation.screening.movie.title}</h3>
-						{#if data.reservation.screening.movie.description}
-							<p class="description">{data.reservation.screening.movie.description}</p>
+				<div class="movie">
+					<h2>Movie Details</h2>
+					<div class="movie-info">
+						{#if data.reservation.screening.movie.posterPath}
+							<img
+								src="https://image.tmdb.org/t/p/w200{data.reservation.screening.movie.posterPath}"
+								alt="{data.reservation.screening.movie.title} poster"
+								class="movie-poster"
+							/>
 						{/if}
-						{#if data.reservation.screening.movie.releaseYear}
-							<p><strong>Release Year:</strong> {data.reservation.screening.movie.releaseYear}</p>
-						{/if}
-						{#if data.reservation.screening.movie.duration}
-							<p><strong>Duration:</strong> {data.reservation.screening.movie.duration} minutes</p>
-						{/if}
+						<div class="movie-details">
+							<h3>{data.reservation.screening.movie.title}</h3>
+							{#if data.reservation.screening.movie.description}
+								<p class="description">{data.reservation.screening.movie.description}</p>
+							{/if}
+							{#if data.reservation.screening.movie.releaseYear}
+								<p><strong>Release Year:</strong> {data.reservation.screening.movie.releaseYear}</p>
+							{/if}
+							{#if data.reservation.screening.movie.duration}
+								<p>
+									<strong>Duration:</strong>
+									{data.reservation.screening.movie.duration} minutes
+								</p>
+							{/if}
+						</div>
 					</div>
+				</div>
+				<div class="qr-code">
+					{@html qrCodeSvgString}
 				</div>
 			</div>
 
@@ -162,6 +176,13 @@
 		font-size: 0.875rem;
 	}
 
+	.movie-section {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2rem;
+		align-items: center;
+	}
+
 	.reservation-details {
 		display: flex;
 		flex-direction: column;
@@ -247,11 +268,26 @@
 		font-weight: bold;
 		color: rgb(var(--m3-scheme-primary));
 	}
-
 	.payment-actions {
 		margin: 1.5rem 0;
 	}
 
+	.qr-code {
+		align-self: stretch;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.qr-code :global(svg) {
+		width: 100%;
+		height: 100%;
+	}
+
+	.movie {
+		flex: 1;
+	}
 	@media (max-width: 768px) {
 		:global(.reservation-card) {
 			padding: 1rem;
@@ -263,12 +299,23 @@
 			text-align: center;
 		}
 
+		.movie-section {
+			flex-direction: column;
+			align-items: center;
+		}
+
 		.movie-info {
 			flex-direction: column;
 			text-align: center;
 		}
 
 		.movie-poster {
+			align-self: center;
+		}
+
+		.qr-code {
+			width: 80%;
+			height: 80%;
 			align-self: center;
 		}
 

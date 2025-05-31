@@ -6,10 +6,12 @@ import { zod } from "sveltekit-superforms/adapters";
 import { updateUsedSchema } from "./updateUsedSchema";
 import { getSession } from "$lib/auth/session";
 
-export const load: PageServerLoad = async ({ parent, depends }) => {
+export const load: PageServerLoad = async ({ parent, depends, url }) => {
     depends("app:reservations");
     const parentData = await parent();
     verifyAdminRights(parentData.session);
+
+    const search = url.searchParams.get('search') || '';
 
     const reservations = await client.reservation.findMany({
         include: {
@@ -35,7 +37,7 @@ export const load: PageServerLoad = async ({ parent, depends }) => {
 
     const form = await superValidate(zod(updateUsedSchema));
 
-    return { reservations, form };
+    return { reservations, form, search };
 };
 
 export const actions: Actions = {
