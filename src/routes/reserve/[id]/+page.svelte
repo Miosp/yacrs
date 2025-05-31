@@ -4,10 +4,22 @@
 	import { encodeReserveList } from './reservationUtils';
 	import Auditorium from '$lib/components/Auditorium.svelte';
 	import type { PageData } from './$types';
+	import { source } from 'sveltekit-sse';
 
 	const { data }: { data: PageData } = $props();
 
+	let reservedSeats = $state(data.reservedSeatIds);
 	let selectedSeats = $state<number[]>([]);
+
+	source(`/reserve/${data.screeningId}/api`)
+		.select('changed')
+		.subscribe((event) => {
+			if (!event) return;
+			const changedSeats: number[] = JSON.parse(event);
+			reservedSeats = changedSeats;
+
+			selectedSeats = selectedSeats.filter((s) => !changedSeats.includes(s));
+		});
 
 	function toggleSeat(seatId: number) {
 		if (selectedSeats.includes(seatId)) {
@@ -27,7 +39,7 @@
 	<div class="cinema-container">
 		<Auditorium
 			seats={data.auditoriumSeats}
-			reserved={data.reservedSeatIds}
+			reserved={reservedSeats}
 			userReserved={selectedSeats}
 			onSeatClick={toggleSeat}
 			interactible={true}

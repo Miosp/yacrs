@@ -7,6 +7,7 @@ import { zod } from "sveltekit-superforms/adapters";
 import { reservationSchema } from "./schema";
 import { PaymentStatus } from "@prisma/client";
 import { getSession } from "$lib/auth/session";
+import { reservationEmitter } from "$lib/server/messageQueueExample";
 
 export const load: PageServerLoad = async ({ parent, params, url }) => {
     await parent();
@@ -139,6 +140,8 @@ async function reserveSeats(request: Request, status: PaymentStatus) {
             status: status
         }
     })
+
+    reservationEmitter.emit(form.data.screeningId.toString())
 
     return redirect(303, `/profile/reservations/${res.id}`);
 }

@@ -3,6 +3,7 @@ import { client } from "$lib/services/db";
 import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { PaymentStatus } from "@prisma/client";
+import { reservationEmitter } from "$lib/server/messageQueueExample";
 
 export const load: PageServerLoad = async ({ parent, params, request }) => {
     await parent();
@@ -31,6 +32,9 @@ export const load: PageServerLoad = async ({ parent, params, request }) => {
                         where: {
                             id: {
                                 not: reservationId
+                            },
+                            status: {
+                                not: PaymentStatus.REFUNDED
                             }
                         },
                         include: {
@@ -119,5 +123,6 @@ export const actions: Actions = {
             where: { id: reservationId },
             data: { status: PaymentStatus.REFUNDED }
         });
+        reservationEmitter.emit(reservation.screeningId.toString());
     }
 };
