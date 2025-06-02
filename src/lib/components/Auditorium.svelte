@@ -45,7 +45,6 @@
 		if (!seat) return 'empty';
 		else return seat.state;
 	}
-
 	function handleSeatClick(seat: Seat | null, rowIndex: number, seatIndex: number) {
 		if (interactible) {
 			let seatValue: Seat | EmptySeat;
@@ -57,6 +56,19 @@
 				};
 			} else {
 				seatValue = seat;
+			}
+
+			// Add click animation
+			const button = document.querySelector(
+				`[style*="--row-index: ${rowIndex}; --seat-index: ${seatIndex}"]`
+			);
+			if (button) {
+				//@ts-ignore
+				button.style.animation = 'none';
+				//@ts-ignore
+				button.offsetHeight; // Trigger reflow
+				//@ts-ignore
+				button.style.animation = 'clickPulse 0.3s ease-out';
 			}
 
 			onSeatClick(seatValue);
@@ -83,7 +95,7 @@
 		<div class="seat-area">
 			<div class="row-labels">
 				{#each Array(roomRowSize) as _, rowIndex}
-					<div class="row-label">
+					<div class="row-label" style="--row-index: {rowIndex};">
 						Row {rowIndex + 1}
 					</div>
 				{/each}
@@ -102,6 +114,7 @@
 							disabled={status === 'reserved' || !interactible}
 							onclick={() => handleSeatClick(seat, rowIndex, seatIndex)}
 							aria-label={seat ? `Row ${seat.row}, Seat ${seat.number} - ${status}` : 'Empty space'}
+							style="--row-index: {rowIndex}; --seat-index: {seatIndex};"
 						>
 							{#if seat}
 								<div class="seat-content">
@@ -148,16 +161,38 @@
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 		max-width: 100%;
 		overflow-x: auto;
+		animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 	.alignment-container {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
 		justify-content: center;
 		gap: 2rem;
+		animation: slideInFromTop 1s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
+	@keyframes slideInFromTop {
+		from {
+			opacity: 0;
+			transform: translateY(-30px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 	.screen {
 		box-sizing: border-box;
 		width: fit-content;
@@ -176,6 +211,18 @@
 		position: relative;
 		overflow: hidden;
 		padding: 0 2rem;
+		animation: screenGlow 2s ease-in-out infinite alternate;
+	}
+
+	@keyframes screenGlow {
+		from {
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+		to {
+			box-shadow:
+				0 4px 16px rgba(var(--m3-scheme-primary), 0.2),
+				0 2px 8px rgba(0, 0, 0, 0.2);
+		}
 	}
 
 	.screen::before {
@@ -193,13 +240,40 @@
 		);
 		animation: shimmer 3s infinite;
 	}
-
 	@keyframes shimmer {
 		0% {
 			transform: translateX(-100%);
 		}
 		100% {
 			transform: translateX(100%);
+		}
+	}
+
+	/* Add reduced motion support */
+	@media (prefers-reduced-motion: reduce) {
+		.auditorium,
+		.alignment-container,
+		.seat-area,
+		.row-label,
+		.seat,
+		.legend {
+			animation: none;
+		}
+
+		.screen {
+			animation: none;
+		}
+
+		.seat--user-reserved {
+			animation: none;
+		}
+
+		.seat--clickable:hover {
+			transform: none;
+		}
+
+		.legend-item:hover {
+			transform: none;
 		}
 	}
 
@@ -210,11 +284,22 @@
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 	}
-
 	.seat-area {
 		display: flex;
 		align-items: flex-start;
 		gap: 1rem;
+		animation: slideInFromBottom 1s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	@keyframes slideInFromBottom {
+		from {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.row-labels {
@@ -223,7 +308,6 @@
 		gap: 6px;
 		padding-top: 1rem;
 	}
-
 	.row-label {
 		box-sizing: border-box;
 		height: 40px;
@@ -237,6 +321,18 @@
 		background: rgb(var(--m3-scheme-surface-variant));
 		border-radius: 6px;
 		border: 1px solid rgb(var(--m3-scheme-outline-variant));
+		animation: fadeInLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	@keyframes fadeInLeft {
+		from {
+			opacity: 0;
+			transform: translateX(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
 	}
 
 	.seat-grid {
@@ -248,14 +344,13 @@
 		max-width: 100%;
 		overflow-x: auto;
 	}
-
 	.seat {
 		width: 40px;
 		height: 40px;
 		border: none;
 		border-radius: 8px;
 		cursor: default;
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		position: relative;
 		display: flex;
 		align-items: center;
@@ -263,6 +358,18 @@
 		font-size: 0.75rem;
 		font-weight: 500;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		animation: seatAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	@keyframes seatAppear {
+		from {
+			opacity: 0;
+			transform: scale(0.8) translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
 	}
 
 	.seat--empty {
@@ -282,23 +389,33 @@
 		cursor: not-allowed;
 		border: 2px solid transparent;
 	}
-
 	.seat--user-reserved {
 		background: rgb(var(--m3-scheme-tertiary-container));
 		color: rgb(var(--m3-scheme-on-tertiary-container));
 		border: 2px solid rgb(var(--m3-scheme-tertiary));
 		box-shadow: 0 0 0 2px rgba(var(--m3-scheme-tertiary), 0.2);
+		animation: selectedGlow 2s ease-in-out infinite alternate;
+	}
+
+	@keyframes selectedGlow {
+		from {
+			box-shadow: 0 0 0 2px rgba(var(--m3-scheme-tertiary), 0.2);
+		}
+		to {
+			box-shadow:
+				0 0 0 4px rgba(var(--m3-scheme-tertiary), 0.4),
+				0 0 16px rgba(var(--m3-scheme-tertiary), 0.2);
+		}
 	}
 
 	.seat--clickable {
 		cursor: pointer;
 	}
-
 	.seat--clickable:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		transform: translateY(-3px) scale(1.05);
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+		z-index: 10;
 	}
-
 	.seat--available.seat--clickable:hover {
 		background: rgb(var(--m3-scheme-primary));
 		color: rgb(var(--m3-scheme-on-primary));
@@ -308,6 +425,18 @@
 	.seat--user-reserved.seat--clickable:hover {
 		background: rgb(var(--m3-scheme-tertiary));
 		color: rgb(var(--m3-scheme-on-tertiary));
+	}
+
+	@keyframes clickPulse {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(0.95);
+		}
+		100% {
+			transform: scale(1);
+		}
 	}
 
 	.seat-content {
@@ -324,13 +453,13 @@
 		font-weight: 600;
 		line-height: 1;
 	}
-
 	.legend {
 		display: flex;
 		gap: 2rem;
 		flex-wrap: wrap;
 		justify-content: center;
 		margin-top: 1rem;
+		animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	.legend-item {
@@ -339,6 +468,11 @@
 		gap: 0.5rem;
 		color: rgb(var(--m3-scheme-on-surface));
 		font-size: 0.875rem;
+		transition: transform 0.2s ease;
+	}
+
+	.legend-item:hover {
+		transform: translateY(-2px);
 	}
 
 	.legend-seat {

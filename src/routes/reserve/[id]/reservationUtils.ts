@@ -96,9 +96,9 @@ export async function transformSeatData(data: LoadedSeatData) {
     const roomWidth = data.roomWidth;
     const roomHeight = data.roomHeight;
 
-    const seats: (SeatViewerView | undefined)[][] = Array(roomWidth + 1)
+    const seats: (SeatViewerView | undefined)[][] = Array(roomHeight + 1)
         .fill(null)
-        .map(() => Array(roomHeight + 1).fill(undefined));
+        .map(() => Array(roomWidth + 1).fill(undefined));
 
     for (const seat of data.seatList) {
         seats[seat.row][seat.number] = {
