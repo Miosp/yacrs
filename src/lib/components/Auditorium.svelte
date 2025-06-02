@@ -22,14 +22,18 @@
 	const roomColumnSize = $derived.by(
 		() => roomColumns ?? seats.reduce((maxSeatNum, seat) => Math.max(seat.number, maxSeatNum), 0)
 	);
-
 	const seatGrid = $derived.by(() => {
 		const grid: (Seat | null)[][] = Array(roomRowSize)
 			.fill(null)
 			.map(() => Array(roomColumnSize).fill(null));
 
 		for (const seat of seats) {
-			if (seat.row > 0 && seat.number > 0) {
+			if (
+				seat.row > 0 &&
+				seat.number > 0 &&
+				seat.row <= roomRowSize &&
+				seat.number <= roomColumnSize
+			) {
 				grid[seat.row - 1][seat.number - 1] = seat;
 			}
 		}
@@ -90,7 +94,7 @@
 				style="grid-template-columns: repeat({roomColumnSize}, 1fr); grid-template-rows: repeat({roomRowSize}, 1fr);"
 			>
 				{#each seatGrid as row, rowIndex}
-					{#each row as seat, seatIndex}
+					{#each row as seat, seatIndex (`${rowIndex}-${seatIndex}-${getSeatStatus(seat)}`)}
 						{@const status = getSeatStatus(seat)}
 						<button
 							class="seat seat--{status}"
