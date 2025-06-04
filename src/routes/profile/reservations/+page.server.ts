@@ -22,6 +22,9 @@ export const load: PageServerLoad = async ({ parent, request }) => {
                 }
             },
             seats: true
+        },
+        orderBy: {
+            createdAt: 'desc'
         }
     });
 
